@@ -1,7 +1,12 @@
+from turtle import position
+from typing import Any
 import pygame as pg
+from pygame.transform import scale
 from classes import *
 import math
 import random
+
+from interactions import InteractiveConfig
 
 
 FONTSIZE = 20
@@ -30,7 +35,7 @@ class Hero(Body):
     '''
 
                                     # Заглушка
-    def __init__(self, topleft, size=(60, 120)):
+    def __init__(self, topleft, size=(32, 32)):
         super().__init__(size=size)
         self.add(active)
 
@@ -51,7 +56,7 @@ class Hero(Body):
         return keys
 
     def horisontal_collisions(self):
-        for sprites in obstacles.sprites():
+        for sprites in foreground.sprites():
             if sprites.rect.colliderect(self.rect):
                 if self.vector.x > 0:
                     self.rect.right = sprites.rect.left
@@ -59,7 +64,7 @@ class Hero(Body):
                     self.rect.left = sprites.rect.right
 
     def vertical_collisions(self):
-        for sprites in obstacles.sprites():
+        for sprites in foreground.sprites():
             if sprites.rect.colliderect(self.rect):
                 if self.vector.y < 0:
                     self.rect.top = sprites.rect.bottom
@@ -73,40 +78,6 @@ class Hero(Body):
         if event.key == pg.K_SPACE:
             self.jump()
 
-        if event.key == pg.K_f:
-            self.interactive()
-
-    def interactive(self):
-        for sprites in pg.sprite.spritecollide(self, interactive, False):
-            desc = sprites.description
-
-            if desc.get('name') == 'closet':
-                index = desc['index']
-                for obj in interactive:
-                    desc_obj = obj.description
-
-                    if desc_obj['name'] == 'closet' and \
-                            obj != sprites and desc_obj['index'] == index:
-                        self.rect.bottom = obj.rect.bottom
-                        self.rect.centerx = obj.rect.centerx
-
-            if desc.get('name') == 'door':
-                index = desc['index']
-                for obj in interactive:
-                    desc_obj = obj.description
-
-                    if desc_obj['name'] == 'door' and \
-                            obj != sprites and desc_obj['index'] == index:
-                        self.rect.bottom = obj.rect.bottom
-                        self.rect.centerx = obj.rect.centerx
-
-    def push_interactive(self, movement):
-        for sprites in pg.sprite.spritecollide(self, interactive, False):
-            desc = sprites.description
-            if movement[pg.K_SPACE]:
-                if desc.get('name') == 'Ladders':
-                    self.vector.y = -5
-                    self.on_surface = False
 
     def jump(self):
         if self.on_surface:
@@ -125,7 +96,6 @@ class Hero(Body):
         self.vector.x += 4 if movement[pg.K_d] else 0
         self.vector.x -= 4 if movement[pg.K_a] else 0
 
-        self.push_interactive(movement)
         self.gravitate()
 
         # mark: Каждая коллизия должна обрабатываться отдельно после обновления координат.
@@ -156,80 +126,36 @@ class NPC(Body):
 
 
 class Interactive(Tile):
-    '''
-    Класс создания интерактивных вещей, объектов.
-    К ним можно прикрепить нотификацию для упрощения
-    понимания интерактивчика.
-    '''
-
-    def __init__(self,
-                 topleft: tuple,
-                 texture: pg.Surface,
-                 description: dict
-                 ):
+    def __init__(self, topleft: tuple, texture: pg.Surface = pg.Surface((0, 0))):
         super().__init__()
         self.add(interactive)
 
-        self.description = description
-
+        # Обновление текстурки на Tiled-текстуру
         self.u_image(texture)
         self.rect = self.image.get_rect(topleft=topleft)
 
-        if self.description.get('notification'):
-            notificate = self.description.get('notification')
-
-            Notification(
-                self,
-                {'text': notificate['text']}
-            )
-
-
-class FG(Tile):
-    '''
-    Класс создания прозрачных по хитбоксам
-    клеток. Используется в основном для декораций.
-    '''
-
-    def __init__(self,
-                 topleft: tuple,
-                 texture: pg.Surface,
-                 group: pg.sprite.Group,
-                 ):
-        super().__init__()
-        self.add(group)
-
-        self.u_image(texture)
-        self.rect = self.image.get_rect(topleft=topleft)
-
-
-class BG(Tile):
-    '''
-    Класс создания прозрачных по хитбоксам
-    клеток. Используется в основном для декораций.
-    '''
-
-    def __init__(self,
-                 topleft: tuple,
-                 texture: pg.Surface):
-        super().__init__()
-        self.add(passive)
-
-        self.u_image(texture)
-        self.rect = self.image.get_rect(topleft=topleft)
+        # Конфиг действий интерактивной штуки
+        self.config: InteractiveConfig = None
 
 
 class Block(Tile):
-    '''
-    Класс непрозрачных по хитбоксам объектов.
-    Используется для создания препятствий герою.
-    '''
-
-    def __init__(self,
-                 position: tuple,
-                 surface: pg.Surface):
+    '''Это то, по чему мы ходим.'''
+    def __init__(self, position: tuple, surface: pg.Surface):
         super().__init__()
-        self.add(obstacles)
+        self.add(foreground)
 
+        # Обновление картинки
+        self.u_image(surface)
+        self.rect = self.image.get_rect(topleft=position)
+
+
+class InvBlock(Tile):
+    '''Это то, по чему мы ходим.'''
+    def __init__(self, position: tuple, surface: pg.Surface):
+        super().__init__()
+        self.add(background)
+
+        # Обновление картинки
         self.u_image(surface)
         self.rect = self.image.get_rect(topleft=position)
 
@@ -243,43 +169,29 @@ class Notification(Tile):
 
     def __init__(
             self,
-            notificated,
-            description: dict,
+            object: Any,
+            text: str,
     ):
         super().__init__()
-
-        font = pg.font.SysFont('Arial', FONTSIZE)
-
         self.add(active)
-
-        text = description['text']
+        font = pg.font.SysFont('Arial', FONTSIZE)
         surf = font.render(text, True, (0, 0, 0))
-
-        self.pos = notificated
 
         self.image = self.compile(surf.get_width())
         w, h = self.image.get_rect().w, self.image.get_rect().h
 
-        if type(self.pos) is not tuple:
-            self.rect = self.image.get_rect(
-                bottom=notificated.rect.top - 30,
-                centerx=notificated.rect.centerx
-            )
-            self.pos = notificated.rect.center
-
-        else:
-            self.rect = self.image.get_rect(
-                bottom=notificated[1] - 30,
-                centerx=notificated[0]
-            )
-            self.pos = notificated[0], notificated[1]
+        x, y = (object.rect.centerx, object.rect.centery)
+        self.rect = self.image.get_rect(
+            bottom=y-30,
+            centerx=x
+        )
+        self.pos = (x, y)
+        self.connected_to = object
 
         self.image.blit(surf, ((w - surf.get_width()) / 2, (h - surf.get_height()) / 2))
-
         self.counter = 0
 
     def compile(self, pixtext):
-
         if pixtext < 50:
             surf = pg.Surface((50, 50))
             surf.blit(textures['Notify_0'], (0, 0))
@@ -308,11 +220,13 @@ class Notification(Tile):
         return math.sin(self.counter * 0.05) * 10
 
     def update(self):
-        self.counter += 1
+        margin_y = 100 # Смещение по Y для красоты
 
+        self.counter += 1
         self.counter = 0 if self.counter > 120 else self.counter
 
-        self.rect.y = self.sine() + self.pos[1] - 120
+        self.rect.centerx = self.connected_to.rect.centerx
+        self.rect.bottom = self.sine() + self.connected_to.rect.centery - margin_y
 
 
 class Animation(Tile):

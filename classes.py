@@ -24,8 +24,8 @@ class Camera(pg.sprite.Group):
         self.target_camera(target)
 
         self.draw_group(backbackground, display, coefficient=0.8)
-        self.draw_group(passive, display)
-        self.draw_group(obstacles, display)
+        self.draw_group(background, display)
+        self.draw_group(foreground, display)
         self.draw_group(interactive, display)
         self.draw_group(active, display)
         self.draw_group(firstground, display, coefficient=0.9)
@@ -48,8 +48,9 @@ class supGroup(pg.sprite.Group):
         camera.update()
         camera.custom_draw(hero, display)
 
-obstacles = supGroup(z_order=1)
-passive = supGroup(z_order=2)
+foreground = supGroup(z_order=1)
+background = supGroup(z_order=2)
+
 backbackground = supGroup(z_order=2)
 interactive = supGroup(z_order=3)
 active = supGroup(z_order=4)
@@ -61,9 +62,7 @@ class Tile(pg.sprite.Sprite):
     Базовый класс создания клетки на поле.
     '''
 
-    def __init__(self,
-                 size: tuple = (0, 0),
-                 addgroup_:pg.sprite.Group = None):
+    def __init__(self, size: tuple = (0, 0), addgroup_: pg.sprite.Group = None):
         super().__init__()
         self.add(camera)
 
