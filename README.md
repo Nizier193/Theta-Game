@@ -1,7 +1,7 @@
 ## Local Funny game about Something
 
 ### Images and screenshots
-###### Well I didn`t add them yet so enjoy your stay
+![Chunk System]("sources/chunks.gif")
 
 ### Features
 - Working chunk system
