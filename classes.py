@@ -1,7 +1,5 @@
+from typing import Tuple
 import pygame as pg
-
-CHUNKSIZE = 16 * 60
-TILESIZE = 60
 
 class Camera(pg.sprite.Group):
     def __init__(self):
@@ -22,7 +20,6 @@ class Camera(pg.sprite.Group):
             offset_pos_y = sprites.rect.topleft[1] - self.offset.y
             display.blit(sprites.image, (offset_pos_x, offset_pos_y))
 
-
     def custom_draw(self, target, display):
         self.target_camera(target)
 
@@ -38,21 +35,14 @@ class Camera(pg.sprite.Group):
 camera = Camera()
 
 class supGroup(pg.sprite.Group):
-    '''
-    Вспомогательный класс, который регулирует отрисовку объектов на экране по z_order.
-
-    '''
+    '''Вспомогательный класс, который регулирует отрисовку объектов на экране по z_order.'''
 
     all__ = []
-
-    def __init__(self,
-                 z_order: int = 1,
-                 ):
+    def __init__(self, z_order: int = 1):
         super().__init__()
 
         self.all__.append(self)
         self.z_order = z_order
-
 
     def assembly(self, display: pg.Surface, hero):
         camera.update()
@@ -65,8 +55,6 @@ interactive = supGroup(z_order=3)
 active = supGroup(z_order=4)
 firstground = supGroup(z_order=5)
 slowfirstground = supGroup(z_order=6)
-
-
 
 class Tile(pg.sprite.Sprite):
     '''
@@ -98,7 +86,7 @@ class Body(pg.sprite.Sprite):
     Класс, создающий спрайт объекта: НПС или Главного героя.
     '''
 
-    def __init__(self, size: tuple = (TILESIZE, 60)):
+    def __init__(self, size: Tuple):
         super().__init__()
         self.add(camera)
 

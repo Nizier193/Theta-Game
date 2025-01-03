@@ -1,4 +1,4 @@
-from engine import Game
+from engine import Game, chunk_engine
 
 '''
 Это мой локальный проект, посвященный созданию игры, которая будет мне по душе)
@@ -26,7 +26,11 @@ from engine import Game
 '''
 import pygame as pg
 
+
 pg.init()
-game = Game()
+game = Game(
+    width=1280,
+    height=720
+)
 
 game.run(60)

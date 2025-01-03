@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="212">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="212">
  <tileset firstgid="1" source="textures/map/tiles.tsx"/>
  <tileset firstgid="1025" source="textures/furniture/Мебель.tsx"/>
  <layer id="5" name="BackBackground" width="256" height="256">
@@ -1134,7 +1134,7 @@
   <object id="205" name="red6orion" x="515.455" y="2912.36">
    <point/>
   </object>
-  <object id="211" name="Player" x="608" y="2912">
+  <object id="211" name="Player" x="1008" y="800">
    <point/>
   </object>
  </objectgroup>

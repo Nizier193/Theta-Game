@@ -29,8 +29,9 @@ class Hero(Body):
     Класс главного героя со всеми ему надлежащими функциями.
     '''
 
-    def __init__(self, topleft):
-        super().__init__()
+                                    # Заглушка
+    def __init__(self, topleft, size=(60, 120)):
+        super().__init__(size=size)
         self.add(active)
 
         image = textures['hero']
@@ -38,6 +39,7 @@ class Hero(Body):
 
         self.u_image(image)
         self.rect = self.image.get_rect(topleft=topleft)
+        self.position: Tuple[int, int] = (self.rect.x, self.rect.y)
 
         self.vector = pg.Vector2()
 
@@ -135,6 +137,8 @@ class Hero(Body):
         self.rect.x += self.vector.x
         self.horisontal_collisions()
 
+        self.position = (self.rect.x, self.rect.y)
+
 
 class NPC(Body):
     '''
@@ -179,6 +183,7 @@ class Interactive(Tile):
                 {'text': notificate['text']}
             )
 
+
 class FG(Tile):
     '''
     Класс создания прозрачных по хитбоксам
@@ -220,13 +225,13 @@ class Block(Tile):
     '''
 
     def __init__(self,
-                 topleft: tuple,
-                 texture: pg.Surface):
+                 position: tuple,
+                 surface: pg.Surface):
         super().__init__()
         self.add(obstacles)
 
-        self.u_image(texture)
-        self.rect = self.image.get_rect(topleft=topleft)
+        self.u_image(surface)
+        self.rect = self.image.get_rect(topleft=position)
 
 
 class Notification(Tile):
@@ -343,6 +348,7 @@ class Animation(Tile):
                 mode=self.mode,
             )
 
+
 class Particle(Tile):
     def __init__(self,
                  center: tuple,
@@ -379,6 +385,7 @@ class Particle(Tile):
 
         self.rect.x += self.vector.x
         self.rect.y += self.vector.y
+
 
 animations = {
     'fly': ((-3, 3), (-5, -2)),
