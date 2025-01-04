@@ -206,6 +206,17 @@ class Map():
             config.movement.wait_time = wait_time
             config.movement.max_speed = max_speed
 
+        if object_properties.particles_params:
+            particles_params = object_properties.particles_params
+
+            config.particles.is_particle_emitter = particles_params.is_particle_emitter
+            config.particles.intensity = particles_params.intensity
+            config.particles.side = particles_params.side
+            config.particles.top = particles_params.top
+            config.particles.distance = particles_params.distance
+            config.particles.speed = particles_params.speed
+            config.particles.spread = particles_params.spread
+
         game_object.config = config
 
 

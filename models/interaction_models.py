@@ -14,6 +14,17 @@ class MovementConfig:
         self.wait_time: int = 0
 
 
+class ParticleConfig:
+    def __init__(self) -> None:
+        self.is_particle_emitter: bool = False
+        self.intensity: Optional[int] = None
+        self.side: Optional[int] = None
+        self.top: Optional[int] = None
+        self.distance: Optional[int] = None
+        self.spread: Optional[int] = None
+        self.speed: Optional[int] = None
+
+
 class InteractiveConfig:
     def __init__(self, object):
         # Объект, к которому привязан конфиг
@@ -25,12 +36,16 @@ class InteractiveConfig:
         # Параметры движения
         self.movement: MovementConfig = MovementConfig()
 
+        # Параметры партиклов
+        self.particles: ParticleConfig = ParticleConfig()
+
 
     def __repr__(self) -> str:
         text = f"""
 
 cfg: {self.object} 
 <Нотификация: Text: [{self.notification.text}]; Conn_to: [{self.notification.connected_to}]; Notification: [{self.notification.notification}]>
-<Перемещение: max_speed: [{self.movement.max_speed}]; wait_time: [{self.movement.wait_time}]>"""
+<Перемещение: max_speed: [{self.movement.max_speed}]; wait_time: [{self.movement.wait_time}]>
+<Партиклы: is_emitter [{self.particles.is_particle_emitter}]>"""
         
         return text

@@ -1,7 +1,8 @@
 ## Local Funny game about Something
 
 ### Images and screenshots
-![Chunk System](sources/chunks.gif)
+<img src="sources/chunks.gif" width="300"/>
+<img src="sources/particles.gif" width="300"/>
 
 ### Features
 - Working chunk system
@@ -42,10 +43,13 @@ No support bruh it`s not for commercial using
 - [x] Make code just a little bit more undertandable
 - [x] Debug chunk system
 - [x] Made images and custom furniture
-- [ ] Debug particles
+- [x] Debug particles
+- [ ] Make inventory
+- [ ] Make quest system
 - [ ] Make map for game
 - [ ] Make dialogue system
 - [ ] Make shadows and lights
+- [ ] Make scenario support
 
 ### For what?
 - Idk, just for fun, I return to this project once in a while to continue it and then to abandon it for another forever.

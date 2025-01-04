@@ -13,27 +13,17 @@ import math
 import random
 import pygame as pg
 from pygame.transform import scale
-from typing import Any, Optional, Tuple
+from typing import Any, Optional, Tuple, cast
 
-FONTSIZE = 20
-BASE = 'base/textures/'
+from pathlib import Path
+
+basepath = Path("base/textures")
 textures = {
-    'hero': pg.image.load(f'{BASE}hero/char_50.png'),
-    'Nizier': pg.image.load(f'{BASE}NPC/Nizier.png'),
-    'red6orion': pg.image.load(f'{BASE}NPC/red6orion.png'),
-
-    'Notify_0': pg.image.load(f'{BASE}notification/square.png'),
-    'Notify_1': pg.image.load(f'{BASE}notification/half_1.png'),
-    'Notify_2': pg.image.load(f'{BASE}notification/central.png'),
-    'Notify_3': pg.image.load(f'{BASE}notification/half_2.png'),
+    "square_notify_piece": pg.image.load(basepath / Path("notification/square.png")),
+    "left_notify_piece": pg.image.load(basepath / Path("notification/half_1.png")),
+    "middle_notify_piece": pg.image.load(basepath / Path("notification/central.png")),
+    "right_notify_piece": pg.image.load(basepath / Path("notification/half_2.png"))
 }
-
-particles = {
-    'Music': [pg.image.load(f'{BASE}particles/note1.png'), pg.image.load(f'{BASE}particles/note2.png')],
-    'Bytes': [pg.image.load(f'{BASE}particles/byte0.png'), pg.image.load(f'{BASE}particles/byte1.png')],
-    'Water': [pg.image.load(f'{BASE}particles/water1.png'), pg.image.load(f'{BASE}particles/water2.png')],
-}
-
 
 class Hero(Body):
     '''Класс главного героя со всеми ему надлежащими функциями.'''
@@ -113,7 +103,7 @@ class NPC(Body):
         )
 
         # TODO: // Connect ticks to seconds directly with FPS
-        self.config: InteractiveConfig = None
+        self.config: InteractiveConfig = cast(InteractiveConfig, None)
         self.tick_counter = 0
         self.position = (self.rect.x, self.rect.y)
 
@@ -155,12 +145,35 @@ class Interactive(Tile):
         super().__init__()
         self.add(interactive)
 
+        self.texture = texture
+
         # Обновление текстурки на Tiled-текстуру
         self.u_image(texture)
         self.rect = self.image.get_rect(topleft=topleft)
 
-        # Конфиг действий интерактивной штуки
-        self.config: Optional[InteractiveConfig] = None
+        # Конфиг действий интерактивной штуки, обязательно есть
+        self.config: InteractiveConfig = cast(InteractiveConfig, None)
+        self.particle_group = pg.sprite.Group()
+
+    
+    def emit_particles(self):
+        # Чтобы партиклы разлетались от этого объекта
+        config = self.config.particles
+        intensity = config.intensity
+        
+        if len(self.particle_group) <= intensity:
+            p = Particle(
+                position=(self.rect.centerx, self.rect.centery),
+                surface=self.texture,
+                config=self.config
+            )
+            self.particle_group.add(p)
+
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        if self.config.particles.is_particle_emitter:
+            self.emit_particles()
+        
+        return super().update(*args, **kwargs)
 
 
 class Block(Tile):
@@ -191,10 +204,10 @@ class Notification(Tile):
     координатам, после чего плавает над ней до ручного
     удаления или бесконечно.
     '''
-    def __init__(self, object: Any, text: str,):
+    def __init__(self, object: Any, text: str):
         super().__init__()
-        self.add(support)
-        font = pg.font.SysFont('Arial', FONTSIZE)
+        self.add(support)             # TODO : // Customize fontsize
+        font = pg.font.SysFont('Arial', 20)
         surf = font.render(text, True, (0, 0, 0))
 
         self.image = self.compile(surf.get_width())
@@ -214,13 +227,13 @@ class Notification(Tile):
     def compile(self, pixtext):
         if pixtext < 50:
             surf = pg.Surface((50, 50))
-            surf.blit(textures['Notify_0'], (0, 0))
+            surf.blit(textures['square_notify_piece'], (0, 0))
             return surf
 
         if pixtext > 50 and pixtext < 100:
             surf = pg.Surface((100, 50))
-            surf.blit(textures['Notify_1'], (0, 0))
-            surf.blit(textures['Notify_3'], (50, 0))
+            surf.blit(textures['left_notify_piece'], (0, 0))
+            surf.blit(textures['right_notify_piece'], (50, 0))
 
             return surf
 
@@ -228,11 +241,11 @@ class Notification(Tile):
             n = pixtext // 50 + 1
             surf = pg.Surface((n * 50, 50))
 
-            surf.blit(textures['Notify_1'], (0, 0))
-            surf.blit(textures['Notify_3'], ((n - 1) * 50, 0))
+            surf.blit(textures['left_notify_piece'], (0, 0))
+            surf.blit(textures['right_notify_piece'], ((n - 1) * 50, 0))
 
             for i in range(int(n - 2)):
-                surf.blit(textures['Notify_2'], (i * 50 + 50, 0))
+                surf.blit(textures['middle_notify_piece'], (i * 50 + 50, 0))
 
             return surf
 
@@ -249,81 +262,41 @@ class Notification(Tile):
         self.rect.bottom = self.sine() + self.connected_to.rect.centery - margin_y
 
 
-class Animation(Tile):
-    '''
-    Класс красивых анимаций, вызывается единоразово,
-    создавая объект класса, а после удаляя его.
-    '''
-
-    def __init__(self, center: tuple,
-                 name:str,
-                 distance:int,
-                 intensity:int,
-                 mode:str,
-                 ):
-        super().__init__()
-
-        self.add(active)
-
-        self.rect = self.image.get_rect(center=center)
-
-        self.center = center
-        self.name = name
-        self.distance = distance
-        self.intensity = intensity
-        self.mode = mode
-
-    def launch(self):
-        for i in range(self.intensity):
-            Particle(
-                center=self.center,
-                texture=random.choice(particles.get(self.name)),
-                distance=self.distance,
-                mode=self.mode,
-            )
-
-
 class Particle(Tile):
-    def __init__(self,
-                 center: tuple,
-                 texture: pg.Surface,
-                 distance:int,
-                 mode:str,
-                ):
+    """Партикл, прозрачный двигающийся объект"""
+    def __init__(self, position: Tuple[int, int], surface: pg.Surface, config: InteractiveConfig):
         super().__init__()
-        self.add(active)
+        self.add(background)
+        
+        # Спавн
+        self.spawn_pos = position
 
-        self.u_image(texture)
-        self.rect = self.image.get_rect(center=center)
+        # Обновление спрайта
+        self.u_image(surface)
+        self.rect = self.image.get_rect(center=position)
 
-        self.mode = mode
-        self.distance = distance
-        self.center = center
-        self.vector = pg.Vector2(self.calc_rand(animations.get(mode)))
+        # Конфиг с описанием эмиттера партиклов
+        self.config: InteractiveConfig = config
 
-    def calc_rand(self, available):
-        return (random.randint(available[0][0], available[0][1]), random.randint(available[1][0], available[1][1]))
+        # Скорость партиклов в обе стороны
+        spread = self.config.particles.spread
+        side = self.config.particles.side
+        top = self.config.particles.top
+        self.speed_const_x = self.config.particles.speed * side + random.randint(-spread, spread)
+        self.speed_const_y = self.config.particles.speed * top + random.randint(-spread, spread)
 
-    def calc_distance(self):
-        return abs(self.rect.x - self.center[0]), abs(self.rect.y - self.center[1])
+    def calc_dist(self, spawn_pos, current_pos) -> int:
+        spx, spy = spawn_pos # Изначальное положение
+        cpx, cpy = current_pos # Конечное положение
 
-    def animate(self):
-        dst = self.calc_distance()
+        dx = abs(cpx - spx)
+        dy = abs(cpy - spy)
+        
+        return int(math.sqrt(dx ** 2 + dy ** 2))
+    
+    def update(self) -> None:
+        if self.calc_dist(self.spawn_pos, (self.rect.centerx, self.rect.centery)) > self.config.particles.distance:
+            self.kill()
 
-        if dst[0] > self.distance or dst[1] > self.distance:
-            self.rect.center = self.center
-            self.vector.x, self.vector.y = self.calc_rand(animations.get(self.mode))
-
-    def update(self):
-        self.animate()
-
-        self.rect.x += self.vector.x
-        self.rect.y += self.vector.y
-
-
-animations = {
-    'fly': ((-3, 3), (-5, -2)),
-    'fall': ((-3, 3), (2, 5)),
-    'slowfly': ((-1, 1), (-3, -1)),
-    'slowfall': ((-1, 1), (1, 3)),
-}
+        self.rect.x += self.speed_const_x
+        self.rect.y += self.speed_const_y

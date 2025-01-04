@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="16" tileheight="16" infinite="0" nextlayerid="15" nextobjectid="260">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="266">
  <tileset firstgid="1" source="textures/map/tiles.tsx"/>
  <tileset firstgid="1025" source="textures/furniture/Мебель.tsx"/>
  <tileset firstgid="1039" source="textures/furniture/Heroes.tsx"/>
+ <tileset firstgid="1044" source="Particles.tsx"/>
  <layer id="2" name="Background" width="256" height="256">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -524,95 +525,14 @@
 </data>
  </layer>
  <objectgroup id="3" name="Furniture">
-  <object id="23" gid="1029" x="2566.5" y="751.667" width="23" height="36"/>
-  <object id="25" gid="1030" x="2641.43" y="683.455" width="51.25" height="18"/>
-  <object id="26" gid="1026" x="2589.33" y="707.333" width="40" height="40"/>
-  <object id="28" gid="1032" x="2631" y="752" width="23" height="27"/>
-  <object id="29" gid="1031" x="2659.25" y="751.75" width="29" height="19"/>
-  <object id="33" gid="1029" x="1059.91" y="960" width="23" height="36"/>
-  <object id="34" gid="1032" x="1030.82" y="960" width="23" height="27"/>
-  <object id="46" gid="1032" x="1392" y="880" width="23" height="27"/>
-  <object id="50" gid="1031" x="1408" y="880" width="29" height="19"/>
-  <object id="52" gid="2147484680" x="1424" y="880" width="23" height="27"/>
-  <object id="53" gid="1028" x="928" y="960" width="12" height="35"/>
-  <object id="55" gid="1031" x="1232" y="864" width="29" height="19"/>
-  <object id="56" gid="1031" x="1234" y="844.875" width="29" height="19"/>
-  <object id="57" gid="1031" x="1235.88" y="826.25" width="29" height="19"/>
-  <object id="58" gid="1031" x="1234" y="807.75" width="29" height="19"/>
-  <object id="59" gid="1031" x="1232.38" y="789" width="29" height="19"/>
-  <object id="64" gid="1029" x="1268.82" y="864.182" width="23" height="36"/>
-  <object id="65" gid="1029" x="1299" y="880.182" width="23" height="36"/>
-  <object id="66" gid="1032" x="1300.09" y="844.545" width="23" height="27"/>
-  <object id="82" gid="1035" x="3713.51" y="696" width="70.7411" height="34.75"/>
-  <object id="83" gid="1032" x="3696" y="720" width="23" height="27"/>
-  <object id="84" gid="2147484680" x="3776" y="720" width="23" height="27"/>
-  <object id="108" gid="1031" x="3986" y="688" width="29" height="19"/>
-  <object id="109" gid="1031" x="3967.5" y="656.25" width="29" height="19"/>
-  <object id="110" gid="1032" x="3995" y="669" width="23" height="27"/>
-  <object id="111" gid="1025" x="4016.25" y="704.25" width="23" height="36"/>
-  <object id="112" gid="1073742855" x="4039.5" y="720" width="29" height="19"/>
-  <object id="113" gid="1073742855" x="4020" y="669" width="29" height="19"/>
-  <object id="114" gid="1032" x="4072" y="720" width="23" height="27"/>
-  <object id="115" gid="1027" x="3910.75" y="673" width="40" height="40"/>
-  <object id="130" gid="1036" x="2448" y="752" width="25.1364" height="25.1364"/>
-  <object id="131" gid="1035" x="2409.43" y="700.932" width="43.6203" height="22.5"/>
-  <object id="132" gid="1036" x="1188.25" y="3133.25" width="13.9545" height="13.9545"/>
-  <object id="133" gid="1031" x="1184.5" y="3152" width="29" height="19"/>
-  <object id="134" gid="1032" x="1216" y="3152" width="23" height="27"/>
-  <object id="135" gid="1026" x="1125.5" y="3130.75" width="40" height="40"/>
-  <object id="136" gid="1027" x="1235.5" y="3100.5" width="40" height="40"/>
-  <object id="137" gid="1030" x="1126.5" y="2941.5" width="56.2909" height="21.5"/>
-  <object id="140" gid="1028" x="1120" y="3008" width="12" height="35"/>
-  <object id="141" gid="1028" x="1133.75" y="3008" width="12" height="35"/>
-  <object id="142" gid="1028" x="1147.5" y="3008" width="12" height="35"/>
-  <object id="144" gid="1028" x="1161.5" y="3008" width="12" height="35"/>
-  <object id="145" gid="1028" x="1176" y="3008" width="12" height="35"/>
-  <object id="146" gid="1031" x="1191.75" y="3008.5" width="29" height="19"/>
-  <object id="147" gid="1031" x="1301.88" y="3008.13" width="29" height="19"/>
-  <object id="148" gid="1032" x="1274.25" y="3008.25" width="23" height="27"/>
-  <object id="150" gid="1033" x="1309.63" y="2989.5" width="11.8516" height="9.25"/>
-  <object id="151" gid="1026" x="1362" y="2976.33" width="40" height="40"/>
-  <object id="152" gid="1029" x="1392" y="3152" width="23" height="36"/>
-  <object id="153" gid="1028" x="1376" y="3152" width="12" height="35"/>
-  <object id="154" gid="1032" x="1152" y="3152" width="23" height="27"/>
-  <object id="156" gid="1031" x="722" y="3040" width="29" height="19"/>
-  <object id="157" gid="1031" x="686.375" y="3040.04" width="29" height="19"/>
-  <object id="158" gid="1031" x="706.667" y="3022" width="29" height="19"/>
-  <object id="159" gid="1031" x="706.625" y="3003.13" width="29" height="19"/>
-  <object id="160" gid="1031" x="656.25" y="3040.21" width="29" height="19"/>
-  <object id="161" gid="1031" x="670.667" y="3022" width="29" height="19"/>
-  <object id="162" gid="1031" x="671.333" y="3004" width="29" height="19"/>
-  <object id="163" gid="1031" x="689.333" y="2986.67" width="29" height="19"/>
-  <object id="164" gid="1025" x="496" y="3040" width="23" height="36"/>
-  <object id="165" gid="1025" x="528" y="3040" width="23" height="36"/>
-  <object id="166" gid="1025" x="560" y="3040" width="23" height="36"/>
-  <object id="167" gid="1025" x="510.333" y="3005" width="23" height="36"/>
-  <object id="168" gid="1025" x="542.667" y="3005" width="23" height="36"/>
-  <object id="169" gid="1025" x="525.667" y="2970" width="23" height="36"/>
-  <object id="171" gid="1028" x="608" y="3040" width="12" height="35"/>
-  <object id="172" gid="1028" x="624" y="3040" width="12" height="35"/>
-  <object id="173" gid="1028" x="615.333" y="3006" width="12" height="35"/>
-  <object id="190" gid="1036" x="756.667" y="2928" width="21.3333" height="21.3333"/>
-  <object id="191" gid="1036" x="734" y="2928.25" width="21.3333" height="21.3333"/>
-  <object id="192" gid="1036" x="747.723" y="2906.66" width="21.3333" height="21.3333"/>
-  <object id="206" gid="1031" x="472.545" y="2928.36" width="29" height="19"/>
-  <object id="207" gid="1032" x="448.636" y="2928.18" width="23" height="27"/>
-  <object id="208" gid="1033" x="478.364" y="2910.18" width="13.9773" height="10.9091"/>
-  <object id="217" gid="1038" x="2196" y="2882" width="88" height="58.5829"/>
-  <object id="248" gid="1032" x="1968" y="1600" width="23" height="27"/>
-  <object id="249" gid="1031" x="2000" y="1600" width="29" height="19"/>
-  <object id="250" gid="1034" x="2032" y="1600" width="29" height="47"/>
-  <object id="252" gid="1033" x="2003.75" y="1581.5" width="22.4219" height="17.5"/>
-  <object id="253" gid="1035" x="1856" y="1568" width="63.3302" height="32.6667"/>
-  <object id="254" gid="1027" x="2080" y="1584" width="40" height="40"/>
-  <object id="255" gid="1036" x="1936" y="1600" width="24.5" height="24.5"/>
-  <object id="256" gid="1028" x="1920" y="1600" width="12" height="35"/>
-  <object id="257" gid="1028" x="2160" y="1600" width="12" height="35"/>
-  <object id="258" gid="1028" x="2144" y="1600" width="12" height="35"/>
-  <object id="259" gid="1030" x="1942.25" y="1568.25" width="26.1818" height="10"/>
+  <object id="263" gid="1036" x="2224" y="1568" width="31.4091" height="31.4091">
+   <properties>
+    <property name="NotificationText" value="А я скоро буду играть музычку"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="4" name="Sprites">
-  <object id="238" gid="1039" x="1824" y="1504" width="32" height="32">
+  <object id="238" gid="1039" x="1888" y="1600" width="32" height="32">
    <properties>
     <property name="MaxSpeed" type="int" value="2"/>
     <property name="NotificationText" value="Hi! I`m little Nizier"/>
@@ -624,16 +544,38 @@
   <object id="245" name="Player" gid="1041" x="1984" y="1584" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="8" name="Interactive">
-  <object id="20" name="1_closet" gid="1028" x="1184" y="976" width="12" height="35"/>
-  <object id="22" name="1_closet" gid="1028" x="2256" y="752" width="12" height="35"/>
-  <object id="31" name="0_notebook" gid="1033" x="2660.25" y="734" width="29" height="17"/>
-  <object id="77" name="1_door" gid="1034" x="2496" y="752" width="22.2128" height="36"/>
-  <object id="100" name="1_door" gid="1034" x="3824" y="720" width="25.4521" height="41.25"/>
-  <object id="175" name="2_closet" gid="1028" x="800" y="3152" width="12" height="35">
+  <object id="261" gid="1044" x="2052.5" y="1600.5" width="10" height="10">
    <properties>
-    <property name="NotificationText" value="Привет я табурка"/>
+    <property name="Distance" type="int" value="200"/>
+    <property name="Intensity" type="int" value="100"/>
+    <property name="IsParticleEmitter" type="bool" value="true"/>
+    <property name="Side" type="int" value="0"/>
+    <property name="Speed" type="int" value="20"/>
+    <property name="Spread" type="int" value="5"/>
+    <property name="Top" type="int" value="-1"/>
    </properties>
   </object>
-  <object id="176" name="2_closet" gid="1028" x="1328" y="880" width="12" height="35"/>
+  <object id="262" gid="1045" x="2052.25" y="1600.25" width="10" height="10">
+   <properties>
+    <property name="Distance" type="int" value="200"/>
+    <property name="Intensity" type="int" value="100"/>
+    <property name="IsParticleEmitter" type="bool" value="true"/>
+    <property name="Side" type="int" value="0"/>
+    <property name="Speed" type="int" value="20"/>
+    <property name="Spread" type="int" value="5"/>
+    <property name="Top" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="264" gid="1046" x="2237.09" y="1556.36" width="7.27273" height="7.27273">
+   <properties>
+    <property name="Distance" type="int" value="100"/>
+    <property name="Intensity" type="int" value="50"/>
+    <property name="IsParticleEmitter" type="bool" value="true"/>
+    <property name="Speed" type="int" value="6"/>
+    <property name="Spread" type="int" value="2"/>
+    <property name="Top" type="int" value="-1"/>
+   </properties>
+  </object>
+  <object id="265" gid="1033" x="2045.3" y="1603.25" width="23.7031" height="18.5"/>
  </objectgroup>
 </map>
