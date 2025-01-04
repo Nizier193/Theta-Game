@@ -1,4 +1,3 @@
-import pygame as pg
 from chunk_engine import ChunkEngine, Chunk, Tile
 from classes import active
 from common_classes import camera
@@ -16,18 +15,14 @@ from classes import (
     InvBlock,
     Interactive,
 )
-from tiled_models.interaction_models import InteractiveConfig
-from tiled_models.tiled_models import ObjectPropertiesParser, Properties
+from models.interaction_models import InteractiveConfig
+from models.tiled_models import ObjectPropertiesParser, Properties
+from models.tiled_layers import MapLayers, LayerClass, Layers
 
-from pytmx.util_pygame import load_pygame
-import math
-
+import pygame as pg
 from pygame.transform import scale
-
-from itertools import product
-from typing import Dict, List, Optional, Tuple, Any
-
-from support import MapLayers, LayerClass, Layers
+from pytmx.util_pygame import load_pygame
+from typing import Tuple, List
 
 layers = MapLayers()
 layers.add(LayerClass(Layers.Foreground, Block, foreground))
@@ -37,7 +32,7 @@ layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
 tilesize = 32
 initial_tilesize = 16
 chunk_engine = ChunkEngine(
-    n_blocks=2,
+    n_blocks=16,
     tilesize=tilesize
 )
 

@@ -1,7 +1,5 @@
-from turtle import position
-from typing import Any, Optional, Tuple
-import pygame as pg
-from pygame.transform import scale
+from models.interaction_models import InteractiveConfig
+
 from common_classes import (
     Body, Tile,
     foreground,
@@ -10,11 +8,12 @@ from common_classes import (
     support,
     interactive
 )
+
 import math
 import random
-
-from tiled_models.interaction_models import InteractiveConfig
-
+import pygame as pg
+from pygame.transform import scale
+from typing import Any, Optional, Tuple
 
 FONTSIZE = 20
 BASE = 'base/textures/'
