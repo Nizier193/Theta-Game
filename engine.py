@@ -32,7 +32,7 @@ layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
 tilesize = 32
 initial_tilesize = 16
 chunk_engine = ChunkEngine(
-    n_blocks=16,
+    n_blocks=5,
     tilesize=tilesize
 )
 
@@ -54,7 +54,7 @@ class Map():
     def render_chunks(self, dec_positions: List[Tuple[int, int]]):
         "Создание карты по положению игрока в чанке"
 
-        radius = 10 # Количество чанков от игрока
+        radius = 1 # Количество чанков от игрока
         all_visible_chunks: List[Chunk] = []
         for position in dec_positions:
             visible_chunks_in_area = chunk_engine.get_all_visible_chunks(position, radius=radius)
