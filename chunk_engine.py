@@ -98,28 +98,6 @@ class ChunkEngine:
         
         return list(filter(lambda c: fc(c, radius), self.memory_chunks))
 
-    def clear_chunks(self, dec_position: Tuple[int, int], radius: int = 2):
-        "Удаление невидимых чанков radius в чанках"
-        visible_chunks: List[Chunk] = self.get_all_visible_chunks(dec_position, radius)
-        invisible_chunks: List[Chunk] = []
-
-        pos_x, pos_y = self.calc_chunk(dec_position)
-        def fc(c: Chunk, r: int):
-            x, y = c.chu_position
-            return (x - r <= pos_x <= x + r) and (y - r <= pos_y <= y + r)
-
-        # Список невидимых чанков
-        for chunk in self.visible_chunks:
-            if not fc(chunk, radius):
-                invisible_chunks.append(chunk)
-
-        # Удаление тайлов, которые не видно
-        for chunk in invisible_chunks:
-            for tile in chunk.tiles:
-                tile.object.kill()
-
-            self.visible_chunks.remove(chunk)
-
     def calc_chunk(self, dec_position: Tuple) -> Tuple[int, int]:
         x, y = dec_position
 

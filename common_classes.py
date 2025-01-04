@@ -1,0 +1,103 @@
+from typing import Tuple
+import pygame as pg
+
+class Camera(pg.sprite.Group):
+    "Класс для перемещения спрайтов в зависимости от положения игрока."
+    def __init__(self):
+        super().__init__()
+
+        self.half_width, self.half_height = 1280 / 2, 720 / 2
+        self.offset = pg.Vector2(0, 0)
+
+        self.offset_add = pg.Vector2(0, -100)
+
+    def target_camera(self, target):
+        self.offset.x = (target.rect.centerx - self.half_width) + self.offset_add.x
+        self.offset.y = (target.rect.centery - self.half_height) + self.offset_add.y
+
+    def draw_group(self, group, display, coefficient: float = 1):
+        for sprites in group.sprites():
+            offset_pos_x = (sprites.rect.topleft[0] - self.offset.x * coefficient)
+            offset_pos_y = sprites.rect.topleft[1] - self.offset.y
+            display.blit(sprites.image, (offset_pos_x, offset_pos_y))
+
+    def custom_draw(self, target, display):
+        self.target_camera(target)
+
+        self.draw_group(background, display)
+        self.draw_group(foreground, display)
+        self.draw_group(interactive, display)
+        self.draw_group(support, display)
+        self.draw_group(active, display)
+
+
+camera = Camera()
+
+# Группы
+foreground = pg.sprite.Group() # Стены, пол, etc
+background = pg.sprite.Group() # Фон
+interactive = pg.sprite.Group() # Мебель, картины, прозрачные объекты
+active = pg.sprite.Group() # Группа для NPC / Hero
+support = pg.sprite.Group() # Группа для саппорта: Диалоги, Инвентарь, Нотификации
+
+class Tile(pg.sprite.Sprite):
+    '''Базовый класс создания клетки на поле.'''
+    def __init__(self, size: tuple = (0, 0)):
+        super().__init__()
+        self.add(camera)
+
+        self.image = pg.Surface(size)
+        self.rect = self.image.get_rect()
+
+    def u_image(self, newimage: pg.Surface):
+        self.image = newimage
+        self.rect = self.image.get_rect()
+
+    def any_(self, f_):
+        f_()
+
+
+class Body(pg.sprite.Sprite):
+    '''Класс, создающий спрайт объекта: НПС или Главного героя.'''
+    def __init__(self, size: Tuple[int, int]):
+        super().__init__()
+        self.add(camera)
+
+        self.image = pg.Surface(size)
+        self.rect = self.image.get_rect()
+        self.vector = pg.Vector2()
+
+
+    def u_image(self, newimage: pg.Surface):
+        self.image = newimage
+        self.rect = self.image.get_rect()
+
+
+    def horisontal_collisions(self):
+        for sprites in foreground.sprites():
+            if sprites.rect.colliderect(self.rect):
+                if self.vector.x > 0:
+                    self.rect.right = sprites.rect.left
+                    self.vector.x = 0
+                    
+                if self.vector.x < 0:
+                    self.rect.left = sprites.rect.right
+                    self.vector.x = 0
+
+
+    def vertical_collisions(self):
+        for sprites in foreground.sprites():
+            if sprites.rect.colliderect(self.rect):
+                if self.vector.y < 0:
+                    self.rect.top = sprites.rect.bottom
+
+                if self.vector.y > 0:
+                    self.rect.bottom = sprites.rect.top
+
+                    self.on_surface = True
+
+
+    def gravitate(self):
+        if self.vector.y < 10:
+            self.vector.y += 1
+

@@ -1,15 +1,16 @@
 import pygame as pg
 from chunk_engine import ChunkEngine, Chunk, Tile
+from classes import active
+from common_classes import camera
 
-from classes_l2 import (
+from classes import (
     NPC,
     Notification,
     foreground,
     background,
     interactive,
-    supGroup
 )
-from classes_l2 import (
+from classes import (
     Hero,
     Block,
     InvBlock,
@@ -28,8 +29,6 @@ from typing import Dict, List, Optional, Tuple, Any
 
 from support import MapLayers, LayerClass, Layers
 
-example = supGroup(z_order=-1)
-
 layers = MapLayers()
 layers.add(LayerClass(Layers.Foreground, Block, foreground))
 layers.add(LayerClass(Layers.Background, InvBlock, background))
@@ -38,7 +37,7 @@ layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
 tilesize = 32
 initial_tilesize = 16
 chunk_engine = ChunkEngine(
-    n_blocks=5,
+    n_blocks=2,
     tilesize=tilesize
 )
 
@@ -57,11 +56,16 @@ class Map():
 
         self.hero = self.render_hero()
 
-    def render_chunks(self, dec_position: Tuple[int, int]):
+    def render_chunks(self, dec_positions: List[Tuple[int, int]]):
         "Создание карты по положению игрока в чанке"
 
-        radius = 5 # Количество чанков от игрока
-        all_visible_chunks = chunk_engine.get_all_visible_chunks(dec_position, radius=radius)
+        radius = 10 # Количество чанков от игрока
+        all_visible_chunks: List[Chunk] = []
+        for position in dec_positions:
+            visible_chunks_in_area = chunk_engine.get_all_visible_chunks(position, radius=radius)
+            for chunk in visible_chunks_in_area:
+                if chunk not in all_visible_chunks:
+                    all_visible_chunks.append(chunk)
 
         for chunk in chunk_engine.memory_chunks:
             if (chunk in all_visible_chunks) and not(chunk in chunk_engine.visible_chunks):
@@ -211,10 +215,7 @@ class Map():
 
 
 class Game():
-    def __init__(self,
-                 width: int = 1280,
-                 height: int = 720):
-
+    def __init__(self, width: int = 1280, height: int = 720):
         pg.display.set_caption('Theta - the start of the game.')
 
         self.borders = (width, height)
@@ -222,12 +223,17 @@ class Game():
 
         self.screen = pg.display.get_surface()
         self.clock = pg.time.Clock()
-        self.font = pg.font.SysFont('Arial', 45)
+        self.font = pg.font.SysFont('Arial', 30)
 
         self.map = Map()
         self.hero = self.map.hero
 
-    def run(self, framerate: int = 50):
+    def display_custom_info(self, text: List[str]):
+        for idx, string in enumerate(text):
+            rendered_text = self.font.render(string, True, (0, 0, 0))
+            self.screen.blit(rendered_text, (20, 30 * idx))
+
+    def run(self, framerate: int = 60):
         while True:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -237,16 +243,22 @@ class Game():
 
             self.screen.fill((20, 255, 255))
 
-            # Рендер по z_order
-            example.assembly(self.screen, self.hero)
+            # Вывод нужной информации   
+            fps = self.clock.get_fps()
+            chunk = chunk_engine.calc_chunk(self.hero.position)
+            self.display_custom_info([
+                "Debug Info:",
+                f"FPS: {round(fps)}",
+                f"Chunk: {chunk}"
+            ])
 
-            # Отображение параметров игры
-            self.screen.blit(self.font.render(str(round(self.clock.get_fps())), True, (0, 0, 0)), (20, 60))
-            self.screen.blit(self.font.render(str(chunk_engine.calc_chunk(self.hero.position)), True, (0, 0, 0)), (20, 20))
+            # Кастомная отрисовка
+            camera.update()
+            camera.custom_draw(self.hero, self.screen)
 
             # Рендер чанков
-            hero_position = self.hero.position
-            self.map.render_chunks(hero_position)
+            all_positions_to_render = [npc.position for npc in active]
+            self.map.render_chunks(all_positions_to_render)
 
             pg.display.update()
             self.clock.tick(framerate)

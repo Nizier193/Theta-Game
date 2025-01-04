@@ -1,123 +1,330 @@
-from typing import Tuple
+from turtle import position
+from typing import Any, Optional, Tuple
 import pygame as pg
+from pygame.transform import scale
+from common_classes import (
+    Body, Tile,
+    foreground,
+    background,
+    active,
+    support,
+    interactive
+)
+import math
+import random
 
-class Camera(pg.sprite.Group):
-    def __init__(self):
+from tiled_models.interaction_models import InteractiveConfig
+
+
+FONTSIZE = 20
+BASE = 'base/textures/'
+textures = {
+    'hero': pg.image.load(f'{BASE}hero/char_50.png'),
+    'Nizier': pg.image.load(f'{BASE}NPC/Nizier.png'),
+    'red6orion': pg.image.load(f'{BASE}NPC/red6orion.png'),
+
+    'Notify_0': pg.image.load(f'{BASE}notification/square.png'),
+    'Notify_1': pg.image.load(f'{BASE}notification/half_1.png'),
+    'Notify_2': pg.image.load(f'{BASE}notification/central.png'),
+    'Notify_3': pg.image.load(f'{BASE}notification/half_2.png'),
+}
+
+particles = {
+    'Music': [pg.image.load(f'{BASE}particles/note1.png'), pg.image.load(f'{BASE}particles/note2.png')],
+    'Bytes': [pg.image.load(f'{BASE}particles/byte0.png'), pg.image.load(f'{BASE}particles/byte1.png')],
+    'Water': [pg.image.load(f'{BASE}particles/water1.png'), pg.image.load(f'{BASE}particles/water2.png')],
+}
+
+
+class Hero(Body):
+    '''Класс главного героя со всеми ему надлежащими функциями.'''
+                                    # Заглушка
+    def __init__(self, bottom_center, size=(32, 32), texture: pg.Surface=pg.Surface((32, 32))):
+        super().__init__(size=size)
+        self.add(active)
+
+        self.u_image(texture)
+        centerx, bottom = bottom_center
+        self.rect = self.image.get_rect(
+            centerx=centerx,
+            bottom=bottom
+        )
+        self.position: Tuple[int, int] = (self.rect.x, self.rect.y)
+
+        self.on_surface = False
+        self.acceleration_factor = 1
+        self.max_speed = 6
+
+    def get_movement(self):
+        keys = pg.key.get_pressed()
+        return keys
+
+    def keypress(self, event):
+        if event.key == pg.K_SPACE:
+            self.jump()
+
+    def jump(self):
+        if self.on_surface:
+            self.vector.y -= 25
+            self.on_surface = False
+
+
+    def update(self):
+        movement = self.get_movement()
+
+        if movement[pg.K_d]:
+            if self.vector.x < self.max_speed:
+                self.vector.x += self.acceleration_factor
+        else:
+            if self.vector.x > 0:
+                self.vector.x -= self.acceleration_factor
+        
+        if movement[pg.K_a]:
+            if self.vector.x > -self.max_speed:
+                self.vector.x -= self.acceleration_factor
+        else:
+            if self.vector.x < 0:
+                self.vector.x += self.acceleration_factor
+
+        self.gravitate()
+
+        # mark: Каждая коллизия должна обрабатываться отдельно после обновления координат.
+        # vertical
+        self.rect.y += self.vector.y
+        self.vertical_collisions()
+
+        # horisontal
+        self.rect.x += self.vector.x
+        self.horisontal_collisions()
+
+        self.position = (self.rect.x, self.rect.y)
+
+
+class NPC(Body):
+    '''Класс создания персонажа, отличного от героя.'''
+    def __init__(self, bottom_center: tuple, size: Tuple[int, int], texture: pg.Surface):
+        super().__init__(size)
+        self.add(active)
+
+        self.u_image(texture)
+        centerx, bottom = bottom_center
+        self.rect = self.image.get_rect(
+            centerx=centerx,
+            bottom=bottom
+        )
+
+        # TODO: // Connect ticks to seconds directly with FPS
+        self.config: InteractiveConfig = None
+        self.tick_counter = 0
+        self.position = (self.rect.x, self.rect.y)
+
+    
+    def simple_ai(self):
+        wait_time = self.config.movement.wait_time
+        max_speed = self.config.movement.max_speed
+
+        if self.tick_counter % (wait_time * 60) == 0:
+            # Раз в wait_time секунд
+            self.vector.x = random.randint(-max_speed, max_speed)
+
+    def __repr__(self) -> str:
+        text = f"""
+
+pos: [{self.rect.x} {self.rect.y}]
+vector: [{self.vector.x} {self.vector.y}]
+"""
+        return text
+    
+    def update(self) -> None:
+        self.tick_counter += 1 # Обновление счётчика
+        self.gravitate()
+
+        # Простой ИИ для движения персонажа
+        self.simple_ai()
+
+        self.rect.y += self.vector.y
+        self.vertical_collisions()
+
+        self.rect.x += self.vector.x
+        self.horisontal_collisions()
+
+        self.position = (self.rect.x, self.rect.y)
+
+
+class Interactive(Tile):
+    def __init__(self, topleft: tuple, texture: pg.Surface = pg.Surface((0, 0))):
         super().__init__()
+        self.add(interactive)
 
-        self.half_width, self.half_height = 1280 / 2, 720 / 2
-        self.offset = pg.Vector2(0, 0)
+        # Обновление текстурки на Tiled-текстуру
+        self.u_image(texture)
+        self.rect = self.image.get_rect(topleft=topleft)
 
-        self.offset_add = pg.Vector2(0, -100)
-
-    def target_camera(self, target):
-        self.offset.x = (target.rect.centerx - self.half_width) + self.offset_add.x
-        self.offset.y = (target.rect.centery - self.half_height) + self.offset_add.y
-
-    def draw_group(self, group, display, coefficient: float = 1):
-        for sprites in group.sprites():
-            offset_pos_x = (sprites.rect.topleft[0] - self.offset.x * coefficient)
-            offset_pos_y = sprites.rect.topleft[1] - self.offset.y
-            display.blit(sprites.image, (offset_pos_x, offset_pos_y))
-
-    def custom_draw(self, target, display):
-        self.target_camera(target)
-
-        self.draw_group(backbackground, display, coefficient=0.8)
-        self.draw_group(background, display)
-        self.draw_group(foreground, display)
-        self.draw_group(interactive, display)
-        self.draw_group(active, display)
-        self.draw_group(firstground, display, coefficient=0.9)
-        self.draw_group(slowfirstground, display, coefficient=0.9)
+        # Конфиг действий интерактивной штуки
+        self.config: Optional[InteractiveConfig] = None
 
 
-camera = Camera()
-
-class supGroup(pg.sprite.Group):
-    '''Вспомогательный класс, который регулирует отрисовку объектов на экране по z_order.'''
-
-    all__ = []
-    def __init__(self, z_order: int = 1):
+class Block(Tile):
+    '''Это то, по чему мы ходим.'''
+    def __init__(self, position: tuple, surface: pg.Surface):
         super().__init__()
+        self.add(foreground)
 
-        self.all__.append(self)
-        self.z_order = z_order
+        # Обновление картинки
+        self.u_image(surface)
+        self.rect = self.image.get_rect(topleft=position)
 
-    def assembly(self, display: pg.Surface, hero):
-        camera.update()
-        camera.custom_draw(hero, display)
 
-foreground = supGroup(z_order=1)
-background = supGroup(z_order=2)
+class InvBlock(Tile):
+    '''Это то, что прозрачное.'''
+    def __init__(self, position: tuple, surface: pg.Surface):
+        super().__init__()
+        self.add(background)
 
-backbackground = supGroup(z_order=2)
-interactive = supGroup(z_order=3)
-active = supGroup(z_order=4)
-firstground = supGroup(z_order=5)
-slowfirstground = supGroup(z_order=6)
+        # Обновление картинки
+        self.u_image(surface)
+        self.rect = self.image.get_rect(topleft=position)
 
-class Tile(pg.sprite.Sprite):
+
+class Notification(Tile):
     '''
-    Базовый класс создания клетки на поле.
+    Класс нотификаций, привязывается к объекту или
+    координатам, после чего плавает над ней до ручного
+    удаления или бесконечно.
+    '''
+    def __init__(self, object: Any, text: str,):
+        super().__init__()
+        self.add(support)
+        font = pg.font.SysFont('Arial', FONTSIZE)
+        surf = font.render(text, True, (0, 0, 0))
+
+        self.image = self.compile(surf.get_width())
+        w, h = self.image.get_rect().w, self.image.get_rect().h
+
+        x, y = (object.rect.centerx, object.rect.centery)
+        self.rect = self.image.get_rect(
+            bottom=y-30,
+            centerx=x
+        )
+        self.pos = (x, y)
+        self.connected_to = object
+
+        self.image.blit(surf, ((w - surf.get_width()) / 2, (h - surf.get_height()) / 2))
+        self.counter = random.randint(0, 120)
+
+    def compile(self, pixtext):
+        if pixtext < 50:
+            surf = pg.Surface((50, 50))
+            surf.blit(textures['Notify_0'], (0, 0))
+            return surf
+
+        if pixtext > 50 and pixtext < 100:
+            surf = pg.Surface((100, 50))
+            surf.blit(textures['Notify_1'], (0, 0))
+            surf.blit(textures['Notify_3'], (50, 0))
+
+            return surf
+
+        if pixtext > 100:
+            n = pixtext // 50 + 1
+            surf = pg.Surface((n * 50, 50))
+
+            surf.blit(textures['Notify_1'], (0, 0))
+            surf.blit(textures['Notify_3'], ((n - 1) * 50, 0))
+
+            for i in range(int(n - 2)):
+                surf.blit(textures['Notify_2'], (i * 50 + 50, 0))
+
+            return surf
+
+    def sine(self):
+        return math.sin(self.counter * 0.05) * 10
+
+    def update(self):
+        margin_y = 100 # Смещение по Y для красоты
+
+        self.counter += 1
+        self.counter = 0 if self.counter > 120 else self.counter
+
+        self.rect.centerx = self.connected_to.rect.centerx
+        self.rect.bottom = self.sine() + self.connected_to.rect.centery - margin_y
+
+
+class Animation(Tile):
+    '''
+    Класс красивых анимаций, вызывается единоразово,
+    создавая объект класса, а после удаляя его.
     '''
 
-    def __init__(self, size: tuple = (0, 0)):
+    def __init__(self, center: tuple,
+                 name:str,
+                 distance:int,
+                 intensity:int,
+                 mode:str,
+                 ):
         super().__init__()
-        self.add(camera)
 
-        self.image = pg.Surface(size)
-        self.rect = self.image.get_rect()
+        self.add(active)
 
-    def u_image(self, newimage: pg.Surface):
-        self.image = newimage
-        self.rect = self.image.get_rect()
+        self.rect = self.image.get_rect(center=center)
 
-    def any_(self, f_):
-        f_()
+        self.center = center
+        self.name = name
+        self.distance = distance
+        self.intensity = intensity
+        self.mode = mode
+
+    def launch(self):
+        for i in range(self.intensity):
+            Particle(
+                center=self.center,
+                texture=random.choice(particles.get(self.name)),
+                distance=self.distance,
+                mode=self.mode,
+            )
 
 
-class Body(pg.sprite.Sprite):
-    '''Класс, создающий спрайт объекта: НПС или Главного героя.'''
-    def __init__(self, size: Tuple[int, int]):
+class Particle(Tile):
+    def __init__(self,
+                 center: tuple,
+                 texture: pg.Surface,
+                 distance:int,
+                 mode:str,
+                ):
         super().__init__()
-        self.add(camera)
+        self.add(active)
 
-        self.image = pg.Surface(size)
-        self.rect = self.image.get_rect()
-        self.vector = pg.Vector2()
+        self.u_image(texture)
+        self.rect = self.image.get_rect(center=center)
 
+        self.mode = mode
+        self.distance = distance
+        self.center = center
+        self.vector = pg.Vector2(self.calc_rand(animations.get(mode)))
 
-    def u_image(self, newimage: pg.Surface):
-        self.image = newimage
-        self.rect = self.image.get_rect()
+    def calc_rand(self, available):
+        return (random.randint(available[0][0], available[0][1]), random.randint(available[1][0], available[1][1]))
 
+    def calc_distance(self):
+        return abs(self.rect.x - self.center[0]), abs(self.rect.y - self.center[1])
 
-    def horisontal_collisions(self):
-        for sprites in foreground.sprites():
-            if sprites.rect.colliderect(self.rect):
-                if self.vector.x > 0:
-                    self.rect.right = sprites.rect.left
-                    self.vector.x = 0
-                    
-                if self.vector.x < 0:
-                    self.rect.left = sprites.rect.right
-                    self.vector.x = 0
+    def animate(self):
+        dst = self.calc_distance()
 
+        if dst[0] > self.distance or dst[1] > self.distance:
+            self.rect.center = self.center
+            self.vector.x, self.vector.y = self.calc_rand(animations.get(self.mode))
 
-    def vertical_collisions(self):
-        for sprites in foreground.sprites():
-            if sprites.rect.colliderect(self.rect):
-                if self.vector.y < 0:
-                    self.rect.top = sprites.rect.bottom
+    def update(self):
+        self.animate()
 
-                if self.vector.y > 0:
-                    self.rect.bottom = sprites.rect.top
-
-                    self.on_surface = True
+        self.rect.x += self.vector.x
+        self.rect.y += self.vector.y
 
 
-    def gravitate(self):
-        if self.vector.y < 10:
-            self.vector.y += 1
-
+animations = {
+    'fly': ((-3, 3), (-5, -2)),
+    'fall': ((-3, 3), (2, 5)),
+    'slowfly': ((-1, 1), (-3, -1)),
+    'slowfall': ((-1, 1), (1, 3)),
+}
