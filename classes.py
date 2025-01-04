@@ -62,12 +62,9 @@ class Tile(pg.sprite.Sprite):
     Базовый класс создания клетки на поле.
     '''
 
-    def __init__(self, size: tuple = (0, 0), addgroup_: pg.sprite.Group = None):
+    def __init__(self, size: tuple = (0, 0)):
         super().__init__()
         self.add(camera)
-
-        if addgroup_:
-            self.add(addgroup_)
 
         self.image = pg.Surface(size)
         self.rect = self.image.get_rect()
@@ -81,20 +78,46 @@ class Tile(pg.sprite.Sprite):
 
 
 class Body(pg.sprite.Sprite):
-    '''
-    Класс, создающий спрайт объекта: НПС или Главного героя.
-    '''
-
-    def __init__(self, size: Tuple):
+    '''Класс, создающий спрайт объекта: НПС или Главного героя.'''
+    def __init__(self, size: Tuple[int, int]):
         super().__init__()
         self.add(camera)
 
         self.image = pg.Surface(size)
         self.rect = self.image.get_rect()
+        self.vector = pg.Vector2()
+
 
     def u_image(self, newimage: pg.Surface):
         self.image = newimage
         self.rect = self.image.get_rect()
 
-    def any_(self, f_):
-        f_()
+
+    def horisontal_collisions(self):
+        for sprites in foreground.sprites():
+            if sprites.rect.colliderect(self.rect):
+                if self.vector.x > 0:
+                    self.rect.right = sprites.rect.left
+                    self.vector.x = 0
+                    
+                if self.vector.x < 0:
+                    self.rect.left = sprites.rect.right
+                    self.vector.x = 0
+
+
+    def vertical_collisions(self):
+        for sprites in foreground.sprites():
+            if sprites.rect.colliderect(self.rect):
+                if self.vector.y < 0:
+                    self.rect.top = sprites.rect.bottom
+
+                if self.vector.y > 0:
+                    self.rect.bottom = sprites.rect.top
+
+                    self.on_surface = True
+
+
+    def gravitate(self):
+        if self.vector.y < 10:
+            self.vector.y += 1
+

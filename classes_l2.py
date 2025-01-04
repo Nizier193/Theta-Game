@@ -1,12 +1,12 @@
 from turtle import position
-from typing import Any
+from typing import Any, Optional
 import pygame as pg
 from pygame.transform import scale
 from classes import *
 import math
 import random
 
-from interactions import InteractiveConfig
+from tiled_models.interaction_models import InteractiveConfig
 
 
 FONTSIZE = 20
@@ -30,71 +30,54 @@ particles = {
 
 
 class Hero(Body):
-    '''
-    Класс главного героя со всеми ему надлежащими функциями.
-    '''
-
+    '''Класс главного героя со всеми ему надлежащими функциями.'''
                                     # Заглушка
-    def __init__(self, topleft, size=(32, 32)):
+    def __init__(self, bottom_center, size=(32, 32), texture: pg.Surface=pg.Surface((32, 32))):
         super().__init__(size=size)
         self.add(active)
 
-        image = textures['hero']
-        image = pg.transform.scale(image, (60, 60))
-
-        self.u_image(image)
-        self.rect = self.image.get_rect(topleft=topleft)
+        self.u_image(texture)
+        centerx, bottom = bottom_center
+        self.rect = self.image.get_rect(
+            centerx=centerx,
+            bottom=bottom
+        )
         self.position: Tuple[int, int] = (self.rect.x, self.rect.y)
 
-        self.vector = pg.Vector2()
-
         self.on_surface = False
+        self.acceleration_factor = 1
+        self.max_speed = 6
 
     def get_movement(self):
         keys = pg.key.get_pressed()
-
         return keys
-
-    def horisontal_collisions(self):
-        for sprites in foreground.sprites():
-            if sprites.rect.colliderect(self.rect):
-                if self.vector.x > 0:
-                    self.rect.right = sprites.rect.left
-                if self.vector.x < 0:
-                    self.rect.left = sprites.rect.right
-
-    def vertical_collisions(self):
-        for sprites in foreground.sprites():
-            if sprites.rect.colliderect(self.rect):
-                if self.vector.y < 0:
-                    self.rect.top = sprites.rect.bottom
-
-                if self.vector.y > 0:
-                    self.rect.bottom = sprites.rect.top
-
-                    self.on_surface = True
 
     def keypress(self, event):
         if event.key == pg.K_SPACE:
             self.jump()
 
-
     def jump(self):
         if self.on_surface:
             self.vector.y -= 25
-
             self.on_surface = False
 
-    def gravitate(self):
-        self.vector.y += 1 if self.vector.y < 9 else 0
 
     def update(self):
         movement = self.get_movement()
 
-        self.vector.x = 0
-
-        self.vector.x += 4 if movement[pg.K_d] else 0
-        self.vector.x -= 4 if movement[pg.K_a] else 0
+        if movement[pg.K_d]:
+            if self.vector.x < self.max_speed:
+                self.vector.x += self.acceleration_factor
+        else:
+            if self.vector.x > 0:
+                self.vector.x -= self.acceleration_factor
+        
+        if movement[pg.K_a]:
+            if self.vector.x > -self.max_speed:
+                self.vector.x -= self.acceleration_factor
+        else:
+            if self.vector.x < 0:
+                self.vector.x += self.acceleration_factor
 
         self.gravitate()
 
@@ -111,18 +94,46 @@ class Hero(Body):
 
 
 class NPC(Body):
-    '''
-    Класс создания персонажа, отличного от героя.
-    '''
-
-    def __init__(self,
-                 topleft: tuple,
-                 texture: pg.Surface):
-        super().__init__()
+    '''Класс создания персонажа, отличного от героя.'''
+    def __init__(self, bottom_center: tuple, size: Tuple[int, int], texture: pg.Surface):
+        super().__init__(size)
         self.add(active)
 
         self.u_image(texture)
-        self.rect = self.image.get_rect(topleft=topleft)
+        centerx, bottom = bottom_center
+        self.rect = self.image.get_rect(
+            centerx=centerx,
+            bottom=bottom
+        )
+
+        # TODO: // Connect ticks to seconds directly with FPS
+        self.config: InteractiveConfig = None
+        self.tick_counter = 0
+
+    
+    def simple_ai(self):
+        wait_time = self.config.movement.wait_time
+        max_speed = self.config.movement.max_speed
+
+        if self.tick_counter % (wait_time * 60) == 0:
+            # Раз в wait_time секунд
+            self.vector.x = random.randint(-max_speed, max_speed)
+
+    
+    def update(self) -> None:
+        self.tick_counter += 1 # Обновление счётчика
+        self.gravitate()
+
+        # Простой ИИ для движения персонажа
+        self.simple_ai()
+
+        self.rect.y += self.vector.y
+        self.vertical_collisions()
+
+        self.rect.x += self.vector.x
+        self.horisontal_collisions()
+
+        self.position = (self.rect.x, self.rect.y)
 
 
 class Interactive(Tile):
@@ -135,7 +146,7 @@ class Interactive(Tile):
         self.rect = self.image.get_rect(topleft=topleft)
 
         # Конфиг действий интерактивной штуки
-        self.config: InteractiveConfig = None
+        self.config: Optional[InteractiveConfig] = None
 
 
 class Block(Tile):
@@ -150,7 +161,7 @@ class Block(Tile):
 
 
 class InvBlock(Tile):
-    '''Это то, по чему мы ходим.'''
+    '''Это то, что прозрачное.'''
     def __init__(self, position: tuple, surface: pg.Surface):
         super().__init__()
         self.add(background)
@@ -166,12 +177,7 @@ class Notification(Tile):
     координатам, после чего плавает над ней до ручного
     удаления или бесконечно.
     '''
-
-    def __init__(
-            self,
-            object: Any,
-            text: str,
-    ):
+    def __init__(self, object: Any, text: str,):
         super().__init__()
         self.add(active)
         font = pg.font.SysFont('Arial', FONTSIZE)
@@ -189,7 +195,7 @@ class Notification(Tile):
         self.connected_to = object
 
         self.image.blit(surf, ((w - surf.get_width()) / 2, (h - surf.get_height()) / 2))
-        self.counter = 0
+        self.counter = random.randint(0, 120)
 
     def compile(self, pixtext):
         if pixtext < 50:

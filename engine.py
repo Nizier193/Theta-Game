@@ -2,6 +2,7 @@ import pygame as pg
 from chunk_engine import ChunkEngine, Chunk, Tile
 
 from classes_l2 import (
+    NPC,
     Notification,
     foreground,
     background,
@@ -14,7 +15,8 @@ from classes_l2 import (
     InvBlock,
     Interactive,
 )
-from interactions import InteractiveConfig
+from tiled_models.interaction_models import InteractiveConfig
+from tiled_models.tiled_models import ObjectPropertiesParser, Properties
 
 from pytmx.util_pygame import load_pygame
 import math
@@ -24,7 +26,7 @@ from pygame.transform import scale
 from itertools import product
 from typing import Dict, List, Optional, Tuple, Any
 
-from support import MapLayers, LayerClass, Layers, ObjectPropertiesName, ObjectProperties, Properties
+from support import MapLayers, LayerClass, Layers
 
 example = supGroup(z_order=-1)
 
@@ -46,15 +48,14 @@ class Map():
 
         self.ratio = tilesize / initial_tilesize
 
-        hero_object = self.tmx_data.get_object_by_name('Player')
-        self.hero_position = int(hero_object.x * self.ratio), int(hero_object.y * self.ratio)
-        self.hero = Hero(topleft=self.hero_position)
-
         # Сборка слоёв и их рендер.
-        self.render_tiles(Layers.Background)
-        self.render_tiles(Layers.Foreground)
-        self.render_object(Layers.Interactive)
-        self.render_object(Layers.Furniture)
+        self.render_npc(Layers.Sprites) # NPC
+        self.render_tiles(Layers.Background) # BG
+        self.render_tiles(Layers.Foreground) # FG
+        self.render_object(Layers.Interactive) # Интерактивные штучки
+        self.render_object(Layers.Furniture) # Фурнитура
+
+        self.hero = self.render_hero()
 
     def render_chunks(self, dec_position: Tuple[int, int]):
         "Создание карты по положению игрока в чанке"
@@ -86,6 +87,21 @@ class Map():
 
                 chunk_engine.visible_chunks.remove(chunk)
 
+    def render_hero(self) -> Hero:
+        "Функция создания персонажа"
+        hero_object = self.tmx_data.get_object_by_name('Player')
+        hero_size = (hero_object.width * self.ratio, hero_object.height * self.ratio)
+        hero_properties = ObjectPropertiesParser(hero_object).process()
+        hero_position = int(hero_object.x * self.ratio), int(hero_object.y * self.ratio)
+
+        hero = Hero(
+            bottom_center=hero_position,
+            size=hero_size,
+            texture=scale(hero_object.image, hero_size)
+        )
+        self.process_object_params(hero, hero_properties)
+        return hero
+
     def render_tiles(self, name: str):
         "Чанкование тайлов по их положению на карте"
 
@@ -116,7 +132,8 @@ class Map():
             sized_x = int(object.x * self.ratio)
             sized_y = int(object.y * self.ratio)
 
-            properties = ObjectProperties(object).parse_properties()
+            # Параметры Tiled-объекта с карты
+            properties = ObjectPropertiesParser(object).process()
 
             if image: # Если картинка у объекта есть
                 # Пусть все прозрачные объекты типа мебели и порталов будут класса Interactive
@@ -128,18 +145,69 @@ class Map():
             else:
                 game_object = Interactive(topleft=(sized_x, sized_y))          
 
-            # Создание конфига для интерактива
-            config = InteractiveConfig(game_object)
-            game_object.config = config
-
             # Присваивание каждому из интерактивных элементов его назначение
+            # Создание и заполнение
+            self.process_object_params(
+                game_object=game_object, 
+                object_properties=properties
+            )
 
-            # У объекта есть нотификация
-            if properties.notification:
-                game_object.config.notification = Notification(
-                    game_object, properties.notification
-                )
+    def render_npc(self, name: str):
+        # Отрендерить NPC-like объекты
+        layer = self.tmx_data.get_layer_by_name(name)
 
+        for object in layer:
+            image = object.image
+            sized_width = object.width * self.ratio
+            sized_height = object.height * self.ratio
+
+            sized_x = int(object.x * self.ratio)
+            sized_y = int(object.y * self.ratio)
+
+            # Парсинг даты для персонажа
+            properties = ObjectPropertiesParser(object).process()
+            image = scale(image, (sized_width, sized_height))
+            game_object = NPC(
+                bottom_center=(sized_x, sized_y),
+                size=(sized_width, sized_height),
+                texture=image
+            )
+
+            # Создание и заполнение
+            self.process_object_params(
+                game_object=game_object, 
+                object_properties=properties
+            )
+
+    def process_object_params(self, game_object: NPC, object_properties: Properties):
+        "Функция для создания всех необходимых интерактивных плюшек у спрайта"
+        "К примеру, нотификация или телепорт штуки"
+        # Создание конфига для интерактивного элемента
+        config = InteractiveConfig(game_object)
+
+        # Присваивание каждому из интерактивных элементов его назначение
+
+        # Если у объекта есть нотификация
+        if object_properties.notification_params:
+            notification_params = object_properties.notification_params
+
+            notification_text = notification_params.notification_text
+            notification_object = Notification(game_object, notification_text)
+
+            config.notification.connected_to = game_object
+            config.notification.text = notification_text
+            config.notification.notification = notification_object
+        
+        # Параметры движения
+        if object_properties.movement_params:
+            movement_params = object_properties.movement_params
+            max_speed = movement_params.max_speed
+            wait_time = movement_params.wait_time
+
+            config.movement.wait_time = wait_time
+            config.movement.max_speed = max_speed
+
+        game_object.config = config
 
 
 class Game():
