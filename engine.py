@@ -246,11 +246,6 @@ class Game():
             # Вывод нужной информации   
             fps = self.clock.get_fps()
             chunk = chunk_engine.calc_chunk(self.hero.position)
-            self.display_custom_info([
-                "Debug Info:",
-                f"FPS: {round(fps)}",
-                f"Chunk: {chunk}"
-            ])
 
             # Кастомная отрисовка
             camera.update()
@@ -259,6 +254,12 @@ class Game():
             # Рендер чанков
             all_positions_to_render = [npc.position for npc in active]
             self.map.render_chunks(all_positions_to_render)
+
+            self.display_custom_info([
+                "Debug Info:",
+                f"FPS: {round(fps)}",
+                f"Chunk: {chunk}"
+            ])
 
             pg.display.update()
             self.clock.tick(framerate)

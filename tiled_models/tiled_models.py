@@ -54,7 +54,7 @@ class ObjectPropertiesParser:
         params = NotificationParams()
         params.notification_text = props.get(ObjectPropertiesName.NotificationText)
 
-        if params.notification_text == None:
+        if params.notification_text == None or len(params.notification_text) == 0:
             return None
 
         return params
