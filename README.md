@@ -1,7 +1,9 @@
 ## Local Funny game about Something
 
 ### Images and screenshots
+
 <img src="sources/chunks.gif" width="300"/>
+
 <img src="sources/particles.gif" width="300"/>
 
 ### Features
