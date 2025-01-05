@@ -48,6 +48,7 @@ No support bruh it`s not for commercial using
 - [x] Debug particles
 - [ ] Make inventory
 - [ ] Make quest system
+- [x] Make fancy map for the game
 - [ ] Make map for game
 - [ ] Make dialogue system
 - [ ] Make shadows and lights
