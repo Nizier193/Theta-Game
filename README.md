@@ -1,6 +1,7 @@
-## Local Funny game about Something
+## NNLG - No Name Local Game
 
 ### Images and screenshots
+Please wait for images to load... They`re quite slow for some reason. Or open them manually =)
 
 <img src="sources/chunks.gif" width="300"/>
 
@@ -39,7 +40,7 @@ python main.py
 
 #### Linux
 ```bash
-No support bruh it`s not for commercial using
+Same for linux i dont want to write there bruh
 ```
 
 ### Roadmap
