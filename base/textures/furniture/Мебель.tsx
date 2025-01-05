@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset version="1.10" tiledversion="1.11.0" name="Мебель" tilewidth="822" tileheight="720" tilecount="14" columns="0">
+<tileset version="1.10" tiledversion="1.11.0" name="Мебель" tilewidth="1126" tileheight="811" tilecount="15" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <tile id="0">
   <properties>
@@ -84,5 +84,8 @@
    <property name="NotificationText" value=""/>
   </properties>
   <image source="../images/416.jpg" width="700" height="466"/>
+ </tile>
+ <tile id="14">
+  <image source="../images/cool_background.jpg" width="1126" height="811"/>
  </tile>
 </tileset>

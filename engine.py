@@ -8,12 +8,14 @@ from classes import (
     foreground,
     background,
     interactive,
+    camera
 )
 from classes import (
     Hero,
     Block,
     InvBlock,
     Interactive,
+    Trigger
 )
 from models.tiled_models import ObjectPropertiesParser, Properties
 from models.tiled_layers import MapLayers, LayerClass, Layers
@@ -28,7 +30,7 @@ layers.add(LayerClass(Layers.Foreground, Block, foreground))
 layers.add(LayerClass(Layers.Background, InvBlock, background))
 layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
 
-tilesize = 32
+tilesize = 48
 initial_tilesize = 16
 chunk_engine = ChunkEngine(
     n_blocks=5, # Количество блоков в чанке
@@ -46,10 +48,14 @@ class Map():
         self.render_npc(Layers.Sprites) # NPC
         self.render_tiles(Layers.Background) # BG
         self.render_tiles(Layers.Foreground) # FG
-        self.render_object(Layers.Interactive) # Интерактивные штучки
-        self.render_object(Layers.Furniture) # Фурнитура
 
+        # Создание игрока
         self.hero = self.render_hero()
+        camera.set_new_target(self.hero)
+
+        self.render_object(Layers.Interactive) # Интерактивные штучки
+
+
 
     def render_hero(self) -> Hero:
         "Функция создания персонажа"
@@ -101,13 +107,24 @@ class Map():
             properties = ObjectPropertiesParser(object).process()
 
             # Пусть все прозрачные объекты типа мебели и порталов будут класса Interactive
-            image = scale(image, (sized_width, sized_height))
+            if not properties.trigger_params.is_trigger:
+                image = scale(image, (sized_width, sized_height))
 
-            game_object = Interactive(
-                topleft=(sized_x, sized_y),
-                texture=image,
-                properties=properties
-            )
+                game_object = Interactive(
+                    topleft=(sized_x, sized_y),
+                    texture=image,
+                    properties=properties
+                )
+            else:
+                image = scale(pg.Surface((1, 1)), (sized_width, sized_height))
+
+                game_object = Trigger(
+                    trigger_sprite=self.hero,
+                    center=(sized_x, sized_y),
+                    properties=properties,
+                    surface=image
+                )
+
             self.process_object_properties(game_object, properties)
 
     def render_npc(self, name: str):
@@ -135,7 +152,7 @@ class Map():
             )
             self.process_object_properties(game_object, properties)
 
-    def process_object_properties(self, object: Union[Interactive, Hero, NPC], properties: Properties):
+    def process_object_properties(self, object: Union[Interactive, Hero, NPC, Trigger], properties: Properties):
         "Обработка параметров объектов: Создание диалогов, партиклов, эмиттеров, etc."
 
         if properties.notification_params:
@@ -183,7 +200,7 @@ class Game():
 
             # Кастомная отрисовка
             camera.update()
-            camera.custom_draw(self.hero, self.screen)
+            camera.custom_draw(self.screen)
 
             # Рендер чанков
             all_positions_to_render = [npc.position for npc in active]

@@ -6,10 +6,13 @@ class Camera(pg.sprite.Group):
     def __init__(self):
         super().__init__()
 
-        self.half_width, self.half_height = 1280 / 2, 720 / 2
-        self.offset = pg.Vector2(0, 0)
+        self.half_width, self.half_height = 1280 / 2, 720 / 2 # TODO: // Make this customizable
 
-        self.offset_add = pg.Vector2(0, -200)
+        self.offset = pg.Vector2(0, 0)
+        self.offset_add = pg.Vector2(0, -100)
+
+        self.target: pg.sprite.Sprite = None
+        self.ratio: int = 1
 
     def target_camera(self, target):
         self.offset.x = (target.rect.centerx - self.half_width) + self.offset_add.x
@@ -21,8 +24,8 @@ class Camera(pg.sprite.Group):
             offset_pos_y = sprites.rect.topleft[1] - self.offset.y
             display.blit(sprites.image, (offset_pos_x, offset_pos_y))
 
-    def custom_draw(self, target, display):
-        self.target_camera(target)
+    def custom_draw(self, display):
+        self.target_camera(self.target)
 
         # Мир: пол и стены
         self.draw_group(background, display)
@@ -34,6 +37,18 @@ class Camera(pg.sprite.Group):
         self.draw_group(support, display)
         self.draw_group(active, display)
 
+    # Customize
+    def set_new_target(self, target: pg.sprite.Sprite):
+        "Установить камере новую цель для отслеживания"
+        self.target = target
+
+    def set_new_camera_pos(self, position: Tuple[int, int]):
+        "Поставить камеру в определенную position точку"
+        x, y = position
+        dummy_sprite = pg.sprite.Sprite()
+        dummy_sprite.image = pg.Surface((0, 0))
+        dummy_sprite.rect = dummy_sprite.image.get_rect(centerx=x, centery=y)
+        self.set_new_target(dummy_sprite)
 
 camera = Camera()
 
@@ -55,7 +70,7 @@ class Tile(pg.sprite.Sprite):
         self.image = pg.Surface(size)
         self.rect = self.image.get_rect()
 
-    def u_image(self, newimage: pg.Surface):
+    def update_image(self, newimage: pg.Surface):
         self.image = newimage
         self.rect = self.image.get_rect()
 
@@ -74,7 +89,7 @@ class Body(pg.sprite.Sprite):
         self.vector = pg.Vector2()
 
 
-    def u_image(self, newimage: pg.Surface):
+    def update_image(self, newimage: pg.Surface):
         self.image = newimage
         self.rect = self.image.get_rect()
 

@@ -5,7 +5,7 @@ from common_classes import (
     active,
     support,
     interactive,
-    particles
+    camera,
 )
 
 import math
@@ -33,7 +33,7 @@ class Hero(Body):
         super().__init__(size=size)
         self.add(active)
 
-        self.u_image(texture)
+        self.update_image(texture)
         centerx, bottom = bottom_center
         self.rect = self.image.get_rect(
             centerx=centerx,
@@ -42,8 +42,8 @@ class Hero(Body):
         self.position: Tuple[int, int] = (self.rect.x, self.rect.y)
 
         self.on_surface = False
-        self.acceleration_factor = 1
-        self.max_speed = 6
+        self.acceleration_factor = 0.10
+        self.max_speed = 4
 
         self.properties: Properties = properties
 
@@ -98,7 +98,7 @@ class NPC(Body):
         super().__init__(size)
         self.add(active)
 
-        self.u_image(texture)
+        self.update_image(texture)
         centerx, bottom = bottom_center
         self.rect = self.image.get_rect(
             centerx=centerx,
@@ -148,7 +148,7 @@ class Interactive(Tile):
         super().__init__()
         self.add(interactive)
 
-        self.u_image(texture)
+        self.update_image(texture)
         self.texture = texture # Оригинальная текстурка
         
         self.rect = self.image.get_rect(topleft=topleft)
@@ -177,6 +177,55 @@ class Interactive(Tile):
             self.emit_particles()
         
         return super().update(*args, **kwargs)
+    
+
+class TriggerType:
+    CameraTrigger: str = "CameraTrigger"
+
+    CameraMove: str = "Move"
+    CameraSet: str = "Set"
+    CameraHero: str = "Hero"
+
+class Trigger(Tile):
+    def __init__(self, trigger_sprite: pg.sprite.Sprite, center: tuple, properties: Properties, surface: pg.Surface):
+        super().__init__()
+        self.add(interactive)
+
+        surface.set_alpha(0)
+        self.update_image(surface)
+
+        self.trigger_sprite: pg.sprite.Sprite = trigger_sprite
+        
+        centerx, centery = center
+        self.rect = self.image.get_rect(topleft=center)
+
+        self.properties: Properties = properties
+        self.trigger_type: str = self.properties.trigger_params.trigger_type
+
+    
+    def camera_trigger(self):
+        props = self.properties.trigger_params
+
+        if props.camera_movement == TriggerType.CameraSet:
+            camera.set_new_camera_pos((props.to_x, props.to_y))
+
+        elif props.camera_movement == TriggerType.CameraMove:
+            cam_x, cam_y = camera.target.rect.centerx, camera.target.rect.centery
+            new_x, new_y = (
+                cam_x + props.offset_x, 
+                cam_y + props.offset_y
+            )
+            camera.set_new_camera_pos((new_x, new_y))
+        
+        else:
+            camera.set_new_target(self.trigger_sprite)
+
+
+
+    def update(self) -> None:
+        if self.rect.colliderect(self.trigger_sprite.rect):
+            if self.trigger_type == TriggerType.CameraTrigger:
+                self.camera_trigger()
 
 
 class Block(Tile):
@@ -186,7 +235,7 @@ class Block(Tile):
         self.add(foreground)
 
         # Обновление картинки
-        self.u_image(surface)
+        self.update_image(surface)
         self.rect = self.image.get_rect(topleft=position)
 
 
@@ -197,7 +246,7 @@ class InvBlock(Tile):
         self.add(background)
 
         # Обновление картинки
-        self.u_image(surface)
+        self.update_image(surface)
         self.rect = self.image.get_rect(topleft=position)
 
 
@@ -275,7 +324,7 @@ class Particle(Tile):
         self.spawn_pos = position
 
         # Обновление спрайта
-        self.u_image(surface)
+        self.update_image(surface)
         self.rect = self.image.get_rect(center=position)
 
         # Конфиг с описанием эмиттера партиклов
