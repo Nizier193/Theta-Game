@@ -33,4 +33,4 @@ game = Game(
     height=720
 )
 
-game.run(60)
+game.run(70)

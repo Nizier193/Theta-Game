@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="359">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="256" height="256" tilewidth="16" tileheight="16" infinite="0" nextlayerid="18" nextobjectid="361">
  <tileset firstgid="1" source="textures/map/tiles.tsx"/>
  <tileset firstgid="1025" source="textures/furniture/Мебель.tsx"/>
  <tileset firstgid="1039" source="textures/furniture/Heroes.tsx"/>
@@ -524,179 +524,13 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="3" name="Furniture">
-  <object id="263" gid="1036" x="2224" y="1568" width="31.4091" height="31.4091">
-   <properties>
-    <property name="NotificationText" value="А я скоро буду играть музычку"/>
-   </properties>
-  </object>
-  <object id="266" gid="1027" x="2208" y="1632" width="40" height="40"/>
-  <object id="267" gid="1038" x="1652.57" y="1467.5" width="52.098" height="32.6364"/>
- </objectgroup>
- <objectgroup id="4" name="Sprites">
-  <object id="238" gid="1039" x="1888" y="1600" width="32" height="32">
-   <properties>
-    <property name="MaxSpeed" type="int" value="2"/>
-    <property name="NotificationText" value="Hi! I`m little Nizier"/>
-    <property name="WaitTime" type="int" value="5"/>
-   </properties>
-  </object>
- </objectgroup>
+ <objectgroup id="3" name="Furniture"/>
+ <objectgroup id="4" name="Sprites"/>
  <objectgroup id="14" name="Hero">
   <object id="245" name="Player" gid="1041" x="1984" y="1584" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="8" name="Interactive">
-  <object id="261" gid="1044" x="2056.25" y="1537.5" width="10" height="10">
-   <properties>
-    <property name="Distance" type="int" value="200"/>
-    <property name="Intensity" type="int" value="100"/>
-    <property name="IsParticleEmitter" type="bool" value="true"/>
-    <property name="Side" type="int" value="0"/>
-    <property name="Speed" type="int" value="20"/>
-    <property name="Spread" type="int" value="5"/>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="265" gid="1033" x="2064" y="1600" width="23.7031" height="18.5"/>
-  <object id="330" gid="1048" x="2690" y="1558" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="331" gid="1048" x="2781.5" y="1596" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="332" gid="1048" x="2643" y="1619" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="334" gid="1048" x="2715.5" y="1556" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="335" gid="1048" x="2864" y="1543.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="336" gid="1048" x="2849" y="1569" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="337" gid="1048" x="2833.5" y="1595.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="338" gid="1048" x="2807.5" y="1602.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="339" gid="1048" x="2759" y="1581" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="340" gid="1048" x="2737.5" y="1560" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="341" gid="1048" x="2881.5" y="1524" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="342" gid="1048" x="2896.5" y="1553.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="343" gid="1048" x="2898.5" y="1528.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="344" gid="1048" x="2927.5" y="1605" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="345" gid="1048" x="2897.5" y="1573" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="346" gid="1048" x="2906.5" y="1595.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="347" gid="1048" x="2947.5" y="1596.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="348" gid="1048" x="2954" y="1574.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="349" gid="1048" x="2983.5" y="1489.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="350" gid="1048" x="2973.5" y="1563.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="351" gid="1048" x="2994" y="1514" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="352" gid="1048" x="3012.5" y="1527" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="353" gid="1048" x="3033" y="1526" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="354" gid="1048" x="3040.5" y="1548.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="355" gid="1048" x="3042" y="1576.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="356" gid="1048" x="3057.5" y="1594.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="357" gid="1048" x="2669.5" y="1587" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
-  <object id="358" gid="1048" x="2626" y="1618.5" width="10" height="10">
-   <properties>
-    <property name="Top" type="int" value="-1"/>
-   </properties>
-  </object>
+  <object id="359" gid="1047" x="1732" y="1481.5" width="20" height="20"/>
+  <object id="360" gid="1034" x="2064" y="1600" width="29" height="47"/>
  </objectgroup>
 </map>

@@ -148,21 +148,16 @@ class Interactive(Tile):
         super().__init__()
         self.add(interactive)
 
-        self.texture = texture
-
-        # Обновление текстурки на Tiled-текстуру
         self.u_image(texture)
+        self.texture = texture # Оригинальная текстурка
+        
         self.rect = self.image.get_rect(topleft=topleft)
 
         # Конфиг действий интерактивной штуки, обязательно есть
         self.properties: Properties = properties
-
-        # Если является эмиттером - удалить текстурку
         if self.properties.particles_params.is_particle_emitter:
-            # Группа для партиклов эмиттера
-            # Обновление спрайта эмиттера на ничего
             self.particle_group = pg.sprite.Group()
-
+            self.image = pg.Surface((0, 0))
     
     def emit_particles(self):
         # Чтобы партиклы разлетались от этого объекта

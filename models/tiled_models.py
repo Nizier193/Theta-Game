@@ -118,4 +118,6 @@ class ObjectPropertiesParser:
         properties.movement_params = self.parse_movement(object_properties)
         properties.particles_params = self.parse_particles(object_properties)
 
+        print(properties)
+
         return properties

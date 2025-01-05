@@ -9,7 +9,7 @@ class Camera(pg.sprite.Group):
         self.half_width, self.half_height = 1280 / 2, 720 / 2
         self.offset = pg.Vector2(0, 0)
 
-        self.offset_add = pg.Vector2(0, -100)
+        self.offset_add = pg.Vector2(0, -200)
 
     def target_camera(self, target):
         self.offset.x = (target.rect.centerx - self.half_width) + self.offset_add.x
