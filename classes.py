@@ -1,12 +1,11 @@
-from models.interaction_models import InteractiveConfig
-
 from common_classes import (
     Body, Tile,
     foreground,
     background,
     active,
     support,
-    interactive
+    interactive,
+    particles
 )
 
 import math
@@ -16,6 +15,8 @@ from pygame.transform import scale
 from typing import Any, Optional, Tuple, cast
 
 from pathlib import Path
+
+from models.tiled_models import Properties
 
 basepath = Path("base/textures")
 textures = {
@@ -28,7 +29,7 @@ textures = {
 class Hero(Body):
     '''Класс главного героя со всеми ему надлежащими функциями.'''
                                     # Заглушка
-    def __init__(self, bottom_center, size=(32, 32), texture: pg.Surface=pg.Surface((32, 32))):
+    def __init__(self, bottom_center, properties: Properties, size=(32, 32), texture: pg.Surface=pg.Surface((32, 32))):
         super().__init__(size=size)
         self.add(active)
 
@@ -43,6 +44,8 @@ class Hero(Body):
         self.on_surface = False
         self.acceleration_factor = 1
         self.max_speed = 6
+
+        self.properties: Properties = properties
 
     def get_movement(self):
         keys = pg.key.get_pressed()
@@ -91,7 +94,7 @@ class Hero(Body):
 
 class NPC(Body):
     '''Класс создания персонажа, отличного от героя.'''
-    def __init__(self, bottom_center: tuple, size: Tuple[int, int], texture: pg.Surface):
+    def __init__(self, bottom_center: tuple, size: Tuple[int, int], properties: Properties, texture: pg.Surface):
         super().__init__(size)
         self.add(active)
 
@@ -103,14 +106,14 @@ class NPC(Body):
         )
 
         # TODO: // Connect ticks to seconds directly with FPS
-        self.config: InteractiveConfig = cast(InteractiveConfig, None)
+        self.properties = properties
         self.tick_counter = 0
         self.position = (self.rect.x, self.rect.y)
 
     
     def simple_ai(self):
-        wait_time = self.config.movement.wait_time
-        max_speed = self.config.movement.max_speed
+        wait_time = self.properties.movement_params.wait_time
+        max_speed = self.properties.movement_params.max_speed
 
         if self.tick_counter % (wait_time * 60) == 0:
             # Раз в wait_time секунд
@@ -141,7 +144,7 @@ vector: [{self.vector.x} {self.vector.y}]
 
 
 class Interactive(Tile):
-    def __init__(self, topleft: tuple, texture: pg.Surface = pg.Surface((0, 0))):
+    def __init__(self, topleft: tuple, properties: Properties, texture: pg.Surface = pg.Surface((0, 0))):
         super().__init__()
         self.add(interactive)
 
@@ -152,25 +155,30 @@ class Interactive(Tile):
         self.rect = self.image.get_rect(topleft=topleft)
 
         # Конфиг действий интерактивной штуки, обязательно есть
-        self.config: InteractiveConfig = cast(InteractiveConfig, None)
-        self.particle_group = pg.sprite.Group()
+        self.properties: Properties = properties
+
+        # Если является эмиттером - удалить текстурку
+        if self.properties.particles_params.is_particle_emitter:
+            # Группа для партиклов эмиттера
+            # Обновление спрайта эмиттера на ничего
+            self.particle_group = pg.sprite.Group()
 
     
     def emit_particles(self):
         # Чтобы партиклы разлетались от этого объекта
-        config = self.config.particles
-        intensity = config.intensity
+        intensity: int = self.properties.particles_params.intensity
         
         if len(self.particle_group) <= intensity:
             p = Particle(
                 position=(self.rect.centerx, self.rect.centery),
                 surface=self.texture,
-                config=self.config
+                emitter_properties=self.properties
             )
             self.particle_group.add(p)
 
+
     def update(self, *args: Any, **kwargs: Any) -> None:
-        if self.config.particles.is_particle_emitter:
+        if self.properties.particles_params.is_particle_emitter:
             self.emit_particles()
         
         return super().update(*args, **kwargs)
@@ -264,7 +272,7 @@ class Notification(Tile):
 
 class Particle(Tile):
     """Партикл, прозрачный двигающийся объект"""
-    def __init__(self, position: Tuple[int, int], surface: pg.Surface, config: InteractiveConfig):
+    def __init__(self, position: Tuple[int, int], surface: pg.Surface, emitter_properties: Properties):
         super().__init__()
         self.add(background)
         
@@ -276,14 +284,17 @@ class Particle(Tile):
         self.rect = self.image.get_rect(center=position)
 
         # Конфиг с описанием эмиттера партиклов
-        self.config: InteractiveConfig = config
+        self.emitter_props: Properties = emitter_properties
 
         # Скорость партиклов в обе стороны
-        spread = self.config.particles.spread
-        side = self.config.particles.side
-        top = self.config.particles.top
-        self.speed_const_x = self.config.particles.speed * side + random.randint(-spread, spread)
-        self.speed_const_y = self.config.particles.speed * top + random.randint(-spread, spread)
+        self.distance: int = self.emitter_props.particles_params.distance
+        spread: int = self.emitter_props.particles_params.spread
+        side: int = self.emitter_props.particles_params.side
+        top: int = self.emitter_props.particles_params.top
+        speed: int = self.emitter_props.particles_params.speed
+
+        self.speed_const_x = speed * side + random.randint(-spread, spread)
+        self.speed_const_y = speed * top + random.randint(-spread, spread)
 
     def calc_dist(self, spawn_pos, current_pos) -> int:
         spx, spy = spawn_pos # Изначальное положение
@@ -295,7 +306,7 @@ class Particle(Tile):
         return int(math.sqrt(dx ** 2 + dy ** 2))
     
     def update(self) -> None:
-        if self.calc_dist(self.spawn_pos, (self.rect.centerx, self.rect.centery)) > self.config.particles.distance:
+        if self.calc_dist(self.spawn_pos, (self.rect.centerx, self.rect.centery)) > self.distance:
             self.kill()
 
         self.rect.x += self.speed_const_x

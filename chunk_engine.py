@@ -1,6 +1,9 @@
 
 from typing import Any, Tuple, List
+from pygame.transform import scale
 import math
+
+from models.tiled_layers import MapLayers
 
 class Tile:
     def __init__(self, tile: Any, position: Tuple[int, int], tile_name: str):
@@ -29,9 +32,10 @@ N_tiles: {len(self.tiles)}
 """
 
 class ChunkEngine:
-    def __init__(self, n_blocks: int = 5, tilesize: int = 16):
+    def __init__(self, layers: MapLayers, n_blocks: int = 5, tilesize: int = 16):
         self.n_blocks = n_blocks
         self.tilesize = tilesize
+        self.layers = layers
 
         self.memory_chunks: List[Chunk] = [] # Все чанки хранятся в памяти
         self.visible_chunks: List[Chunk] = [] # Отображаемые чанки
@@ -107,3 +111,38 @@ class ChunkEngine:
         chunk_y = math.ceil(y / chunk_size)
 
         return (chunk_x, chunk_y)
+    
+    def render_chunks(self, dec_positions: List[Tuple[int, int]]):
+        "Создание карты по положению игрока в чанке"
+
+        radius = 5 # Количество чанков от игрока
+        all_visible_chunks: List[Chunk] = []
+        for position in dec_positions:
+            visible_chunks_in_area = self.get_all_visible_chunks(position, radius=radius)
+            for chunk in visible_chunks_in_area:
+                if chunk not in all_visible_chunks:
+                    all_visible_chunks.append(chunk)
+
+        for chunk in self.memory_chunks:
+            if (chunk in all_visible_chunks) and not(chunk in self.visible_chunks):
+                for tile in chunk.tiles:
+                    x, y = tile.position
+                    surface = tile.tile
+                    tile_class_name = tile.tile_class_name
+
+                    layer = self.layers.get_layer(tile_class_name)
+                    tile_class = layer.object_class
+
+                    tile_object = tile_class(
+                        position = (x * self.tilesize, y * self.tilesize),
+                        surface = scale(surface, (self.tilesize, self.tilesize))
+                    )
+                    tile.object = tile_object
+                
+                self.visible_chunks.append(chunk)
+            
+            if not(chunk in all_visible_chunks) and (chunk in self.visible_chunks):
+                for tile in chunk.tiles:
+                    tile.object.kill()
+
+                self.visible_chunks.remove(chunk)

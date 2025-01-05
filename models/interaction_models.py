@@ -26,9 +26,9 @@ class ParticleConfig:
 
 
 class InteractiveConfig:
-    def __init__(self, object):
+    def __init__(self):
         # Объект, к которому привязан конфиг
-        self.object = object
+        self.object: Optional[Any] = None
         
         # Нотификация, которая привязана к Interactive
         self.notification: NotificationConfig = NotificationConfig()

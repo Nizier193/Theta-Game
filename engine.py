@@ -1,4 +1,4 @@
-from chunk_engine import ChunkEngine, Chunk, Tile
+from chunk_engine import ChunkEngine, Tile
 from classes import active
 from common_classes import camera
 
@@ -15,16 +15,15 @@ from classes import (
     InvBlock,
     Interactive,
 )
-from models.interaction_models import InteractiveConfig
 from models.tiled_models import ObjectPropertiesParser, Properties
 from models.tiled_layers import MapLayers, LayerClass, Layers
 
 import pygame as pg
 from pygame.transform import scale
 from pytmx.util_pygame import load_pygame
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
-layers = MapLayers()
+layers: MapLayers = MapLayers()
 layers.add(LayerClass(Layers.Foreground, Block, foreground))
 layers.add(LayerClass(Layers.Background, InvBlock, background))
 layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
@@ -32,8 +31,9 @@ layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
 tilesize = 32
 initial_tilesize = 16
 chunk_engine = ChunkEngine(
-    n_blocks=5,
-    tilesize=tilesize
+    n_blocks=5, # Количество блоков в чанке
+    tilesize=tilesize, # Тайлсайз
+    layers=layers
 )
 
 class Map():
@@ -51,41 +51,6 @@ class Map():
 
         self.hero = self.render_hero()
 
-    def render_chunks(self, dec_positions: List[Tuple[int, int]]):
-        "Создание карты по положению игрока в чанке"
-
-        radius = 1 # Количество чанков от игрока
-        all_visible_chunks: List[Chunk] = []
-        for position in dec_positions:
-            visible_chunks_in_area = chunk_engine.get_all_visible_chunks(position, radius=radius)
-            for chunk in visible_chunks_in_area:
-                if chunk not in all_visible_chunks:
-                    all_visible_chunks.append(chunk)
-
-        for chunk in chunk_engine.memory_chunks:
-            if (chunk in all_visible_chunks) and not(chunk in chunk_engine.visible_chunks):
-                for tile in chunk.tiles:
-                    x, y = tile.position
-                    surface = tile.tile
-                    tile_class_name = tile.tile_class_name
-
-                    layer = layers.get_layer(tile_class_name)
-                    tile_class = layer.object_class
-
-                    tile_object = tile_class(
-                        position = (x * tilesize, y * tilesize),
-                        surface = scale(surface, (tilesize, tilesize))
-                    )
-                    tile.object = tile_object
-                
-                chunk_engine.visible_chunks.append(chunk)
-            
-            if not(chunk in all_visible_chunks) and (chunk in chunk_engine.visible_chunks):
-                for tile in chunk.tiles:
-                    tile.object.kill()
-
-                chunk_engine.visible_chunks.remove(chunk)
-
     def render_hero(self) -> Hero:
         "Функция создания персонажа"
         hero_object = self.tmx_data.get_object_by_name('Player')
@@ -96,9 +61,10 @@ class Map():
         hero = Hero(
             bottom_center=hero_position,
             size=hero_size,
-            texture=scale(hero_object.image, hero_size)
+            texture=scale(hero_object.image, hero_size),
+            properties=hero_properties
         )
-        self.process_object_params(hero, hero_properties)
+        self.process_object_properties(hero, hero_properties)
         return hero
 
     def render_tiles(self, name: str):
@@ -134,22 +100,15 @@ class Map():
             # Параметры Tiled-объекта с карты
             properties = ObjectPropertiesParser(object).process()
 
-            if image: # Если картинка у объекта есть
-                # Пусть все прозрачные объекты типа мебели и порталов будут класса Interactive
-                image = scale(image, (sized_width, sized_height))
-                game_object = Interactive(
-                    topleft=(sized_x, sized_y),
-                    texture=image
-                )          
-            else:
-                game_object = Interactive(topleft=(sized_x, sized_y))          
+            # Пусть все прозрачные объекты типа мебели и порталов будут класса Interactive
+            image = scale(image, (sized_width, sized_height))
 
-            # Присваивание каждому из интерактивных элементов его назначение
-            # Создание и заполнение
-            self.process_object_params(
-                game_object=game_object, 
-                object_properties=properties
+            game_object = Interactive(
+                topleft=(sized_x, sized_y),
+                texture=image,
+                properties=properties
             )
+            self.process_object_properties(game_object, properties)
 
     def render_npc(self, name: str):
         # Отрендерить NPC-like объекты
@@ -165,59 +124,28 @@ class Map():
 
             # Парсинг даты для персонажа
             properties = ObjectPropertiesParser(object).process()
+
             image = scale(image, (sized_width, sized_height))
+
             game_object = NPC(
                 bottom_center=(sized_x, sized_y),
                 size=(sized_width, sized_height),
-                texture=image
+                texture=image,
+                properties=properties
             )
+            self.process_object_properties(game_object, properties)
 
-            # Создание и заполнение
-            self.process_object_params(
-                game_object=game_object, 
-                object_properties=properties
+    def process_object_properties(self, object: Union[Interactive, Hero, NPC], properties: Properties):
+        "Обработка параметров объектов: Создание диалогов, партиклов, эмиттеров, etc."
+
+        if properties.notification_params:
+            text = properties.notification_params.notification_text
+            # У объекта есть нотификация
+            Notification(
+                object=object,
+                text=text
             )
-
-    def process_object_params(self, game_object: NPC, object_properties: Properties):
-        "Функция для создания всех необходимых интерактивных плюшек у спрайта"
-        "К примеру, нотификация или телепорт штуки"
-        # Создание конфига для интерактивного элемента
-        config = InteractiveConfig(game_object)
-
-        # Присваивание каждому из интерактивных элементов его назначение
-
-        # Если у объекта есть нотификация
-        if object_properties.notification_params:
-            notification_params = object_properties.notification_params
-
-            notification_text = notification_params.notification_text
-            notification_object = Notification(game_object, notification_text)
-
-            config.notification.connected_to = game_object
-            config.notification.text = notification_text
-            config.notification.notification = notification_object
         
-        # Параметры движения
-        if object_properties.movement_params:
-            movement_params = object_properties.movement_params
-            max_speed = movement_params.max_speed
-            wait_time = movement_params.wait_time
-
-            config.movement.wait_time = wait_time
-            config.movement.max_speed = max_speed
-
-        if object_properties.particles_params:
-            particles_params = object_properties.particles_params
-
-            config.particles.is_particle_emitter = particles_params.is_particle_emitter
-            config.particles.intensity = particles_params.intensity
-            config.particles.side = particles_params.side
-            config.particles.top = particles_params.top
-            config.particles.distance = particles_params.distance
-            config.particles.speed = particles_params.speed
-            config.particles.spread = particles_params.spread
-
-        game_object.config = config
 
 
 class Game():
@@ -259,14 +187,13 @@ class Game():
 
             # Рендер чанков
             all_positions_to_render = [npc.position for npc in active]
-            self.map.render_chunks(all_positions_to_render)
+            chunk_engine.render_chunks(all_positions_to_render)
 
             self.display_custom_info([
                 "Debug Info:",
                 f"FPS: {round(fps)}",
                 f"Chunk: {chunk}"
             ])
-
             pg.display.update()
             self.clock.tick(framerate)
 

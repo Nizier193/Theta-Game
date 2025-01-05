@@ -24,9 +24,13 @@ class Camera(pg.sprite.Group):
     def custom_draw(self, target, display):
         self.target_camera(target)
 
+        # Мир: пол и стены
         self.draw_group(background, display)
         self.draw_group(foreground, display)
+
+        # Объекты
         self.draw_group(interactive, display)
+        self.draw_group(particles, display)
         self.draw_group(support, display)
         self.draw_group(active, display)
 
@@ -37,8 +41,10 @@ camera = Camera()
 foreground = pg.sprite.Group() # Стены, пол, etc
 background = pg.sprite.Group() # Фон
 interactive = pg.sprite.Group() # Мебель, картины, прозрачные объекты
+particles = pg.sprite.Group() # Партиклы: пули, стрелы, сердечки
 active = pg.sprite.Group() # Группа для NPC / Hero
 support = pg.sprite.Group() # Группа для саппорта: Диалоги, Инвентарь, Нотификации
+
 
 class Tile(pg.sprite.Sprite):
     '''Базовый класс создания клетки на поле.'''
