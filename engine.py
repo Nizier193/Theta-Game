@@ -32,10 +32,12 @@ layers: MapLayers = MapLayers()
 layers.add(LayerClass(Layers.Foreground, Block))
 layers.add(LayerClass(Layers.Background, InvBlock))
 
-tilesize = 48
-initial_tilesize = 16
+tilesize = settings.tilesize
+initial_tilesize = settings.initial_tilesize
+n_blocks_chunk = settings.n_blocks_chunk
+
 chunk_engine = ChunkEngine(
-    n_blocks=5, # Количество блоков в чанке
+    n_blocks=n_blocks_chunk, # Количество блоков в чанке
     tilesize=tilesize, # Тайлсайз
     layers=layers
 )

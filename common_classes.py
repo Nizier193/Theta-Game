@@ -50,6 +50,7 @@ class Camera(pg.sprite.Group):
         dummy_sprite.rect = dummy_sprite.image.get_rect(centerx=x, centery=y)
         self.set_new_target(dummy_sprite)
 
+# TODO: // Get rid of variables outside of classes
 camera = Camera()
 
 # Вспомогательные группы для столкновений etc

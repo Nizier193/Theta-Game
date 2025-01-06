@@ -1,5 +1,8 @@
 {
     "width": 720,
     "height": 720,
-    "framerate": 65
+    "framerate": 65,
+    "tilesize": 64,
+    "initial_tilesize": 16,
+    "n_blocks_chunk": 5
 }
