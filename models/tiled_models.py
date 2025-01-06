@@ -15,6 +15,7 @@ class ObjectPropertiesName:
     # NPC Params
     MaxSpeed: str = "MaxSpeed"
     WaitTime: str = "WaitTime"
+    WalkTime: str = "WalkTime"
 
     # Particles Params
     IsParticleEmitter: str = "IsParticleEmitter" # // Является ли испускателем частиц
@@ -42,6 +43,7 @@ class ObjectTypeNames:
     Particle: str = "Particle"
     Trigger: str = "Trigger"
     Interactive: str = "Interactive"
+    Particle: str = "Particle"
     Hero: str = "Hero"
 
 
@@ -86,7 +88,8 @@ class ObjectPropertiesParser:
     def parse_movement(self, props) -> MovementParams:
         params = MovementParams()
         params.max_speed = props.get(ObjectPropertiesName.MaxSpeed, 0)
-        params.wait_time = props.get(ObjectPropertiesName.WaitTime, 0)
+        params.wait_time = props.get(ObjectPropertiesName.WaitTime, 1)
+        params.walk_time = props.get(ObjectPropertiesName.WalkTime, 0)
 
         return params
     

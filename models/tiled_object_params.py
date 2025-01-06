@@ -10,7 +10,8 @@ class NotificationParams:
 class MovementParams:
     def __init__(self) -> None:
         self.max_speed: int = 0
-        self.wait_time: int = 0
+        self.wait_time: int = 1 # To avoid 0 division error
+        self.walk_time: int = 0
         # Other params
 
 # Параметры движения NPC

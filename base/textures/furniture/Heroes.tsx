@@ -7,6 +7,7 @@
    <property name="NotificationText" value=""/>
    <property name="ObjectType" value="NPC"/>
    <property name="WaitTime" type="int" value="1"/>
+   <property name="WalkTime" type="int" value="1"/>
   </properties>
   <image source="../hero/char_50.png" width="16" height="16"/>
  </tile>
@@ -16,6 +17,7 @@
    <property name="NotificationText" value=""/>
    <property name="ObjectType" value="NPC"/>
    <property name="WaitTime" type="int" value="1"/>
+   <property name="WalkTime" type="int" value="1"/>
   </properties>
   <image source="../NPC/Nizier.png" width="16" height="16"/>
  </tile>
@@ -25,6 +27,7 @@
    <property name="NotificationText" value=""/>
    <property name="ObjectType" value="NPC"/>
    <property name="WaitTime" type="int" value="1"/>
+   <property name="WalkTime" type="int" value="1"/>
   </properties>
   <image source="../NPC/red6orion.png" width="16" height="16"/>
  </tile>
@@ -34,6 +37,7 @@
    <property name="NotificationText" value=""/>
    <property name="ObjectType" value="NPC"/>
    <property name="WaitTime" type="int" value="1"/>
+   <property name="WalkTime" type="int" value="1"/>
   </properties>
   <image source="../NPC/tarakan.jpg" width="151" height="191"/>
  </tile>

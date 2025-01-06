@@ -22,7 +22,7 @@ from models.tiled_models import ObjectPropertiesParser, Properties, ObjectTypeNa
 from models.tiled_layers import MapLayers, LayerClass, Layers
 
 import pygame as pg
-from pygame.transform import scale
+from pygame.transform import scale, rotate
 from pytmx.util_pygame import load_pygame
 from typing import Optional, Tuple, List, Union, Any
 
@@ -118,37 +118,31 @@ class Map():
             image = object.image
             sized_width = object.width * self.ratio
             sized_height = object.height * self.ratio
+            rotation = object.rotation
 
             sized_x = int(object.x * self.ratio)
             sized_y = int(object.y * self.ratio)
 
             # Параметры Tiled-объекта с карты
             properties = ObjectPropertiesParser(object).process()
-
-
+            image = scale(image, (sized_width, sized_height))
+            image = rotate(image, rotation).convert_alpha()
+    
             # Пусть все прозрачные объекты типа мебели и порталов будут класса Interactive
-            if properties.object_type == ObjectTypeNames.Interactive:
-                image = scale(image, (sized_width, sized_height))
-
+            if properties.object_type in [ObjectTypeNames.Interactive, ObjectTypeNames.Particle]:
                 game_object = Interactive(
                     topleft=(sized_x, sized_y),
                     texture=image,
                     properties=properties
                 )
-
             elif properties.object_type == ObjectTypeNames.NPC:
-                image = scale(image, (sized_width, sized_height))
-
                 game_object = NPC(
                     bottom_center=(sized_x, sized_y),
                     size=(sized_width, sized_height),
                     texture=image,
                     properties=properties
                 )
-
             elif properties.object_type == ObjectTypeNames.Trigger:
-                image = scale(pg.Surface((1, 1)), (sized_width, sized_height))
-
                 game_object = Trigger(
                     trigger_sprite=self.hero,
                     center=(sized_x, sized_y),
@@ -156,7 +150,7 @@ class Map():
                     surface=image
                 )
             
-            elif properties.object_type == ObjectTypeNames.Hero:
+            elif properties.object_type == ObjectTypeNames.Hero or properties.object_type == "Particle":
                 # Создание игрока, можно сюда чё-то запихать, но в целом не нужно
                 continue
 

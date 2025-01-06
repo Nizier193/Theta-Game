@@ -108,16 +108,32 @@ class NPC(Body):
         # TODO: // Connect ticks to seconds directly with FPS
         self.properties = properties
         self.tick_counter = 0
+        self.last_second = 0
+        self.step = 0 # Вспомогательная переменная для отслеживания шага
         self.position = (self.rect.x, self.rect.y)
 
     
     def simple_ai(self):
         wait_time = self.properties.movement_params.wait_time
+        walk_time = self.properties.movement_params.walk_time
         max_speed = self.properties.movement_params.max_speed
 
-        if self.tick_counter % (wait_time * 60) == 0:
-            # Раз в wait_time секунд
+        counter = int(self.tick_counter / (wait_time * 60))
+        calc_next_stand_second = lambda idx: (wait_time + walk_time) * idx
+        calc_next_walk_second = lambda idx: (wait_time + walk_time) * idx + wait_time
+
+        if (calc_next_walk_second(self.step) == counter) and (self.last_second != counter):
+            self.last_second = counter
+            self.step += 1
             self.vector.x = random.randint(-max_speed, max_speed)
+
+        if (calc_next_stand_second(self.step) == counter) and (self.last_second != counter):
+            self.last_second = counter
+            self.vector.x = 0
+
+
+
+        
 
     def __repr__(self) -> str:
         text = f"""
