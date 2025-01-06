@@ -114,9 +114,9 @@ class NPC(Body):
 
     
     def simple_ai(self):
-        wait_time = self.properties.movement_params.wait_time
-        walk_time = self.properties.movement_params.walk_time
-        max_speed = self.properties.movement_params.max_speed
+        wait_time = self.properties.movement_params.WaitTime
+        walk_time = self.properties.movement_params.WalkTime
+        max_speed = self.properties.movement_params.MaxSpeed
 
         counter = int(self.tick_counter / (wait_time * 60))
         calc_next_stand_second = lambda idx: (wait_time + walk_time) * idx
@@ -130,10 +130,6 @@ class NPC(Body):
         if (calc_next_stand_second(self.step) == counter) and (self.last_second != counter):
             self.last_second = counter
             self.vector.x = 0
-
-
-
-        
 
     def __repr__(self) -> str:
         text = f"""
@@ -171,13 +167,13 @@ class Interactive(Tile):
 
         # Конфиг действий интерактивной штуки, обязательно есть
         self.properties: Properties = properties
-        if self.properties.particles_params.is_particle_emitter:
+        if self.properties.particles_params.IsParticleEmitter:
             self.particle_group = pg.sprite.Group()
             self.image = pg.Surface((0, 0))
     
     def emit_particles(self):
         # Чтобы партиклы разлетались от этого объекта
-        intensity: int = self.properties.particles_params.intensity
+        intensity: int = self.properties.particles_params.Intensity
         
         if len(self.particle_group) <= intensity:
             p = Particle(
@@ -189,7 +185,7 @@ class Interactive(Tile):
 
 
     def update(self, *args: Any, **kwargs: Any) -> None:
-        if self.properties.particles_params.is_particle_emitter:
+        if self.properties.particles_params.IsParticleEmitter:
             self.emit_particles()
         
         return super().update(*args, **kwargs)
@@ -201,6 +197,7 @@ class TriggerType:
     CameraMove: str = "Move"
     CameraSet: str = "Set"
     CameraHero: str = "Hero"
+
 
 class Trigger(Tile):
     def __init__(self, trigger_sprite: pg.sprite.Sprite, center: tuple, properties: Properties, surface: pg.Surface):
@@ -216,20 +213,20 @@ class Trigger(Tile):
         self.rect = self.image.get_rect(topleft=center)
 
         self.properties: Properties = properties
-        self.trigger_type: str = self.properties.trigger_params.trigger_type
+        self.trigger_type: str = self.properties.trigger_params.TriggerType
 
     
     def camera_trigger(self):
         props = self.properties.trigger_params
 
-        if props.camera_movement == TriggerType.CameraSet:
-            camera.set_new_camera_pos((props.to_x, props.to_y))
+        if props.CameraMovement == TriggerType.CameraSet:
+            camera.set_new_camera_pos((props.ToX, props.ToY))
 
-        elif props.camera_movement == TriggerType.CameraMove:
+        elif props.CameraMovement == TriggerType.CameraMove:
             cam_x, cam_y = camera.target.rect.centerx, camera.target.rect.centery
             new_x, new_y = (
-                cam_x + props.offset_x, 
-                cam_y + props.offset_y
+                cam_x + props.OffsetX, 
+                cam_y + props.OffsetY
             )
             camera.set_new_camera_pos((new_x, new_y))
         
@@ -347,11 +344,11 @@ class Particle(Tile):
         self.emitter_props: Properties = emitter_properties
 
         # Скорость партиклов в обе стороны
-        self.distance: int = self.emitter_props.particles_params.distance
-        spread: int = self.emitter_props.particles_params.spread
-        side: int = self.emitter_props.particles_params.side
-        top: int = self.emitter_props.particles_params.top
-        speed: int = self.emitter_props.particles_params.speed
+        self.distance: int = self.emitter_props.particles_params.Distance
+        spread: int = self.emitter_props.particles_params.Spread
+        side: int = self.emitter_props.particles_params.Side
+        top: int = self.emitter_props.particles_params.Top
+        speed: int = self.emitter_props.particles_params.Speed
 
         self.speed_const_x = speed * side + random.randint(-spread, spread)
         self.speed_const_y = speed * top + random.randint(-spread, spread)

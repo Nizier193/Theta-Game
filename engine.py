@@ -152,6 +152,8 @@ class Map():
             
             elif properties.object_type == ObjectTypeNames.Hero or properties.object_type == "Particle":
                 # Создание игрока, можно сюда чё-то запихать, но в целом не нужно
+                # Из-за этой штуки не создаётся нотификация
+                # TODO: // Fix this
                 continue
 
             else:
@@ -168,8 +170,8 @@ class Map():
         "Обработка параметров объектов: Создание диалогов, партиклов, эмиттеров, etc."
         objects: List[pg.sprite.Sprite] = []
 
-        if properties.notification_params:
-            text = properties.notification_params.notification_text
+        if properties.notification_params.NotificationText:
+            text = properties.notification_params.NotificationText
             # У объекта есть нотификация
             notification = Notification(
                 object=object,
@@ -179,9 +181,6 @@ class Map():
 
         return objects
         
-
-        
-
 
 class Game():
     def __init__(self):
