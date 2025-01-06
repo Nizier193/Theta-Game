@@ -1,13 +1,14 @@
 from typing import List, Any, Optional
+from pytmx import load_pygame
 
 
 class LayerClass:
-    def __init__(self, name: str, object_class: Any, support_group: Any):
+    def __init__(self, name: str, object_class: Any):
         self.name = name
         self.object_class = object_class
-        self.support_group = support_group
 
 class MapLayers:
+    "Класс-обработчик для работы со слоями Tiled"
     def __init__(self):
         self.classes = []
 
@@ -20,11 +21,8 @@ class MapLayers:
             return None
 
         return layer_class[-1]
-    
+
+# Описание слоёв тайлов
 class Layers:
     Background: str = "Background"
     Foreground: str = "Foreground"
-    Interactive: str = "Interactive"
-    Furniture: str = "Furniture"
-    Notification: str = "Notification"
-    Sprites: str = "Sprites"

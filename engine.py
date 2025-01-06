@@ -1,6 +1,7 @@
 from chunk_engine import ChunkEngine, Tile
 from classes import active
-from common_classes import camera
+from common_classes import camera, settings
+from models.support import TiledClassNames
 
 from classes import (
     NPC,
@@ -17,18 +18,19 @@ from classes import (
     Interactive,
     Trigger
 )
-from models.tiled_models import ObjectPropertiesParser, Properties
+from models.tiled_models import ObjectPropertiesParser, Properties, ObjectTypeNames
 from models.tiled_layers import MapLayers, LayerClass, Layers
 
 import pygame as pg
 from pygame.transform import scale
 from pytmx.util_pygame import load_pygame
-from typing import Tuple, List, Union
+from typing import Optional, Tuple, List, Union, Any
 
+# Для описания тайлов карты: Background и Foreground
+# остальное описывается в функции render_object
 layers: MapLayers = MapLayers()
-layers.add(LayerClass(Layers.Foreground, Block, foreground))
-layers.add(LayerClass(Layers.Background, InvBlock, background))
-layers.add(LayerClass(Layers.Interactive, Interactive, interactive))
+layers.add(LayerClass(Layers.Foreground, Block))
+layers.add(LayerClass(Layers.Background, InvBlock))
 
 tilesize = 48
 initial_tilesize = 16
@@ -44,22 +46,33 @@ class Map():
 
         self.ratio = tilesize / initial_tilesize
 
-        # Сборка слоёв и их рендер.
-        self.render_npc(Layers.Sprites) # NPC
-        self.render_tiles(Layers.Background) # BG
-        self.render_tiles(Layers.Foreground) # FG
+        # Background и Foreground всегда остаются теми же
+        # К слою привязан класс Block или InvTile
+        ordered_sprites_group = pg.sprite.Group()
 
-        # Создание игрока
-        self.hero = self.render_hero()
+        # Отрисовка BG и FG
+        self.render_tiles(Layers.Background)
+        self.render_tiles(Layers.Foreground)
+
+        # Отрисовка Слоёв
+        for group in self.tmx_data.objectgroups:
+            name: str = group.name
+            for sprite in self.render_object(name):
+                ordered_sprites_group.add(sprite) # Интерактивные штучки
+
+        self.hero = self.render_hero() # Создание игрока
+        ordered_sprites_group.add(self.hero)
+
+        camera.all_ordered_sprites = ordered_sprites_group
         camera.set_new_target(self.hero)
-
-        self.render_object(Layers.Interactive) # Интерактивные штучки
-
-
 
     def render_hero(self) -> Hero:
         "Функция создания персонажа"
-        hero_object = self.tmx_data.get_object_by_name('Player')
+        hero_object: Any = None
+        for object in self.tmx_data.objects:
+            if object.properties.get("ObjectType") == "Hero":
+                hero_object = object
+
         hero_size = (hero_object.width * self.ratio, hero_object.height * self.ratio)
         hero_properties = ObjectPropertiesParser(hero_object).process()
         hero_position = int(hero_object.x * self.ratio), int(hero_object.y * self.ratio)
@@ -73,10 +86,11 @@ class Map():
         self.process_object_properties(hero, hero_properties)
         return hero
 
-    def render_tiles(self, name: str):
+    def render_tiles(self, name: str) -> List[Tile]:
         "Чанкование тайлов по их положению на карте"
 
-        layer = self.tmx_data.get_layer_by_name(name)
+        layer: Any = self.tmx_data.get_layer_by_name(name)
+        objects: List[Any] = []
         tiles = layer.tiles()
 
         for X, Y, SURFACE in tiles:
@@ -84,16 +98,21 @@ class Map():
             if not chunk_engine.get_memory_chunk(position):
                 chunk_engine.create_memory_chunk(position)
             
+            # Cannot assign this to render without layers
             tile = Tile(
                 tile = SURFACE,
                 position = (X, Y),
                 tile_name = name
             )
 
+            objects.append(tile)
             chunk_engine.add_memory_chunk(position, tile)
+        
+        return objects
 
-    def render_object(self, name: str):
-        layer = self.tmx_data.get_layer_by_name(name)
+    def render_object(self, name: str) -> List[pg.sprite.Sprite]:
+        layer: Any = self.tmx_data.get_layer_by_name(name)
+        objects: List[pg.sprite.Sprite] = [] # Упорядоченный список рендера
 
         for object in layer:
             image = object.image
@@ -106,8 +125,9 @@ class Map():
             # Параметры Tiled-объекта с карты
             properties = ObjectPropertiesParser(object).process()
 
+
             # Пусть все прозрачные объекты типа мебели и порталов будут класса Interactive
-            if not properties.trigger_params.is_trigger:
+            if properties.object_type == ObjectTypeNames.Interactive:
                 image = scale(image, (sized_width, sized_height))
 
                 game_object = Interactive(
@@ -115,7 +135,18 @@ class Map():
                     texture=image,
                     properties=properties
                 )
-            else:
+
+            elif properties.object_type == ObjectTypeNames.NPC:
+                image = scale(image, (sized_width, sized_height))
+
+                game_object = NPC(
+                    bottom_center=(sized_x, sized_y),
+                    size=(sized_width, sized_height),
+                    texture=image,
+                    properties=properties
+                )
+
+            elif properties.object_type == ObjectTypeNames.Trigger:
                 image = scale(pg.Surface((1, 1)), (sized_width, sized_height))
 
                 game_object = Trigger(
@@ -124,52 +155,45 @@ class Map():
                     properties=properties,
                     surface=image
                 )
+            
+            elif properties.object_type == ObjectTypeNames.Hero:
+                # Создание игрока, можно сюда чё-то запихать, но в целом не нужно
+                continue
 
-            self.process_object_properties(game_object, properties)
+            else:
+                raise Exception(f"Такого объекта нет в нотациях: {properties.object_type}")
 
-    def render_npc(self, name: str):
-        # Отрендерить NPC-like объекты
-        layer = self.tmx_data.get_layer_by_name(name)
+            objects.append(game_object)
+            property_objects = self.process_object_properties(game_object, properties)
 
-        for object in layer:
-            image = object.image
-            sized_width = object.width * self.ratio
-            sized_height = object.height * self.ratio
+            objects.extend(property_objects)
+        
+        return objects
 
-            sized_x = int(object.x * self.ratio)
-            sized_y = int(object.y * self.ratio)
-
-            # Парсинг даты для персонажа
-            properties = ObjectPropertiesParser(object).process()
-
-            image = scale(image, (sized_width, sized_height))
-
-            game_object = NPC(
-                bottom_center=(sized_x, sized_y),
-                size=(sized_width, sized_height),
-                texture=image,
-                properties=properties
-            )
-            self.process_object_properties(game_object, properties)
-
-    def process_object_properties(self, object: Union[Interactive, Hero, NPC, Trigger], properties: Properties):
+    def process_object_properties(self, object: Union[Interactive, Hero, NPC, Trigger], properties: Properties) -> List[pg.sprite.Sprite]:
         "Обработка параметров объектов: Создание диалогов, партиклов, эмиттеров, etc."
+        objects: List[pg.sprite.Sprite] = []
 
         if properties.notification_params:
             text = properties.notification_params.notification_text
             # У объекта есть нотификация
-            Notification(
+            notification = Notification(
                 object=object,
                 text=text
             )
+            objects.append(notification)
+
+        return objects
+        
+
         
 
 
 class Game():
-    def __init__(self, width: int = 1280, height: int = 720):
+    def __init__(self):
         pg.display.set_caption('Theta - the start of the game.')
 
-        self.borders = (width, height)
+        self.borders = (settings.width, settings.height)
         self.screen = pg.display.set_mode(self.borders)
 
         self.screen = pg.display.get_surface()
@@ -184,7 +208,7 @@ class Game():
             rendered_text = self.font.render(string, True, (0, 0, 0))
             self.screen.blit(rendered_text, (20, 30 * idx))
 
-    def run(self, framerate: int = 60):
+    def run(self):
         while True:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -212,6 +236,4 @@ class Game():
                 f"Chunk: {chunk}"
             ])
             pg.display.update()
-            self.clock.tick(framerate)
-
-
+            self.clock.tick(settings.framerate)

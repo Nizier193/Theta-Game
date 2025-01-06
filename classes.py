@@ -42,7 +42,7 @@ class Hero(Body):
         self.position: Tuple[int, int] = (self.rect.x, self.rect.y)
 
         self.on_surface = False
-        self.acceleration_factor = 0.10
+        self.acceleration_factor = 0.5
         self.max_speed = 4
 
         self.properties: Properties = properties

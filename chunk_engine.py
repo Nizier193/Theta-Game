@@ -41,9 +41,9 @@ class ChunkEngine:
         self.visible_chunks: List[Chunk] = [] # Отображаемые чанки
 
     def get_visible_chunk(self, dec_position: Tuple[int, int]) -> Chunk:
+        "Получение видимого чанка на карте"
         chu_position = self.calc_chunk(dec_position)
 
-        "Получение видимого чанка на карте"
         chunk = list(filter(lambda x: x.chu_position == chu_position, self.visible_chunks))
         return chunk[-1] if chunk else None
     
@@ -74,18 +74,18 @@ class ChunkEngine:
         chunk.add(tile)
 
     def create_visible_chunk(self, dec_position: Tuple[int, int]) -> Chunk:
-        chu_position = self.calc_chunk(dec_position)
-
         "Добавление чанка в memory карту чанков"
+
+        chu_position = self.calc_chunk(dec_position)
         chunk = Chunk(chu_position)
         self.visible_chunks.append(chunk)
 
         return chunk
 
     def add_visible_chunk(self, dec_position: Tuple[int, int], tile: Tile):
+        "Добавление тайла в memory карту чанков"
         chu_position = self.calc_chunk(dec_position)
 
-        "Добавление тайла в memory карту чанков"
         if not self.get_visible_chunk(chu_position):
             raise Exception(f"There`s no that memory chunk -> {chu_position}")
 

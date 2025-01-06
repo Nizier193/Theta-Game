@@ -5,6 +5,7 @@
   <properties>
    <property name="CameraMovement" value="Move"/>
    <property name="IsTrigger" type="bool" value="true"/>
+   <property name="ObjectType" value="Trigger"/>
    <property name="OffsetX" type="int" value="0"/>
    <property name="OffsetY" type="int" value="0"/>
    <property name="ToX" type="int" value="0"/>

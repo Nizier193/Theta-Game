@@ -5,7 +5,8 @@
   <properties>
    <property name="MaxSpeed" type="int" value="0"/>
    <property name="NotificationText" value=""/>
-   <property name="WaitTime" type="int" value="0"/>
+   <property name="ObjectType" value="NPC"/>
+   <property name="WaitTime" type="int" value="1"/>
   </properties>
   <image source="../hero/char_50.png" width="16" height="16"/>
  </tile>
@@ -13,7 +14,8 @@
   <properties>
    <property name="MaxSpeed" type="int" value="0"/>
    <property name="NotificationText" value=""/>
-   <property name="WaitTime" type="int" value="0"/>
+   <property name="ObjectType" value="NPC"/>
+   <property name="WaitTime" type="int" value="1"/>
   </properties>
   <image source="../NPC/Nizier.png" width="16" height="16"/>
  </tile>
@@ -21,7 +23,8 @@
   <properties>
    <property name="MaxSpeed" type="int" value="0"/>
    <property name="NotificationText" value=""/>
-   <property name="WaitTime" type="int" value="0"/>
+   <property name="ObjectType" value="NPC"/>
+   <property name="WaitTime" type="int" value="1"/>
   </properties>
   <image source="../NPC/red6orion.png" width="16" height="16"/>
  </tile>
@@ -29,7 +32,8 @@
   <properties>
    <property name="MaxSpeed" type="int" value="0"/>
    <property name="NotificationText" value=""/>
-   <property name="WaitTime" type="int" value="0"/>
+   <property name="ObjectType" value="NPC"/>
+   <property name="WaitTime" type="int" value="1"/>
   </properties>
   <image source="../NPC/tarakan.jpg" width="151" height="191"/>
  </tile>

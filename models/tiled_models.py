@@ -3,6 +3,8 @@ from models.tiled_object_params import NotificationParams, TriggerParams, Moveme
 
 # Нотация переменных из Tiled
 class ObjectPropertiesName:
+    ObjectType: str = "ObjectType"
+
     # Notification Text Params
     NotificationText: str = "NotificationText"
 
@@ -35,9 +37,18 @@ class ObjectPropertiesName:
     CameraMovement: str = "CameraMovement"
 
 
+class ObjectTypeNames:
+    NPC: str = "NPC"
+    Particle: str = "Particle"
+    Trigger: str = "Trigger"
+    Interactive: str = "Interactive"
+    Hero: str = "Hero"
+
+
 # Класс, описывающий атрибуты объектов в Tiled
 class Properties:
     def __init__(self) -> None:
+        self.object_type: str = "Invisible"
         self.notification_params: Optional[NotificationParams] = None
         self.movement_params: MovementParams = MovementParams()
         self.particles_params: ParticleParams = ParticleParams()
@@ -96,6 +107,8 @@ class ObjectPropertiesParser:
         properties = Properties()
 
         object_properties = self.object.properties
+        properties.object_type = object_properties.get(ObjectPropertiesName.ObjectType)
+
         properties.notification_params = self.parse_notification(object_properties)
         properties.movement_params = self.parse_movement(object_properties)
         properties.particles_params = self.parse_particles(object_properties)

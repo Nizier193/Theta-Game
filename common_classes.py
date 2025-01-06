@@ -1,18 +1,24 @@
 from typing import Tuple
 import pygame as pg
+from models.settings import load_settings
+
+settings = load_settings()
 
 class Camera(pg.sprite.Group):
     "Класс для перемещения спрайтов в зависимости от положения игрока."
     def __init__(self):
         super().__init__()
 
-        self.half_width, self.half_height = 1280 / 2, 720 / 2 # TODO: // Make this customizable
+        self.half_width, self.half_height = settings.width / 2, settings.height / 2 # TODO: // Make this customizable
 
         self.offset = pg.Vector2(0, 0)
         self.offset_add = pg.Vector2(0, -100)
 
         self.target: pg.sprite.Sprite = None
         self.ratio: int = 1
+
+        # Упорядоченные в порядке отрисовки спрайты
+        self.all_ordered_sprites = pg.sprite.Group()
 
     def target_camera(self, target):
         self.offset.x = (target.rect.centerx - self.half_width) + self.offset_add.x
@@ -27,15 +33,9 @@ class Camera(pg.sprite.Group):
     def custom_draw(self, display):
         self.target_camera(self.target)
 
-        # Мир: пол и стены
         self.draw_group(background, display)
         self.draw_group(foreground, display)
-
-        # Объекты
-        self.draw_group(interactive, display)
-        self.draw_group(particles, display)
-        self.draw_group(support, display)
-        self.draw_group(active, display)
+        self.draw_group(self.all_ordered_sprites, display)
 
     # Customize
     def set_new_target(self, target: pg.sprite.Sprite):
@@ -52,9 +52,10 @@ class Camera(pg.sprite.Group):
 
 camera = Camera()
 
-# Группы
+# Вспомогательные группы для столкновений etc
 foreground = pg.sprite.Group() # Стены, пол, etc
 background = pg.sprite.Group() # Фон
+
 interactive = pg.sprite.Group() # Мебель, картины, прозрачные объекты
 particles = pg.sprite.Group() # Партиклы: пули, стрелы, сердечки
 active = pg.sprite.Group() # Группа для NPC / Hero

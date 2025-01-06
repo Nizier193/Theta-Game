@@ -28,9 +28,6 @@ import pygame as pg
 
 
 pg.init()
-game = Game(
-    width=1280,
-    height=720
-)
+game = Game()
+game.run()
 
-game.run(70)
