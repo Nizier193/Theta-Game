@@ -269,14 +269,13 @@ class Notification(Tile):
     координатам, после чего плавает над ней до ручного
     удаления или бесконечно.
     '''
-    def __init__(self, object: Any, text: str):
+    def __init__(self, object: Any, text: str, properties: Properties):
         super().__init__()
         self.add(support)             # TODO : // Customize fontsize
         font = pg.font.SysFont('Arial', 20)
         surf = font.render(text, True, (0, 0, 0))
 
         self.image = self.compile(surf.get_width())
-        w, h = self.image.get_rect().w, self.image.get_rect().h
 
         x, y = (object.rect.centerx, object.rect.centery)
         self.rect = self.image.get_rect(
@@ -285,8 +284,9 @@ class Notification(Tile):
         )
         self.pos = (x, y)
         self.connected_to = object
+        self.properties = properties.notification_params
 
-        self.image.blit(surf, ((w - surf.get_width()) / 2, (h - surf.get_height()) / 2))
+        self.image.blit(surf, ((self.rect.w - surf.get_width()) / 2, (self.rect.h - surf.get_height()) / 2))
         self.counter = random.randint(0, 120)
 
     def compile(self, pixtext):
@@ -316,15 +316,27 @@ class Notification(Tile):
 
     def sine(self):
         return math.sin(self.counter * 0.05) * 10
+    
+    def movement(self, movement_name: str):
+        # TODO: // Make fixed param names
+        if movement_name == "Sin":
+            return math.sin(self.counter * 0.05) * 10
+        
+        if movement_name == "Fixed":
+            return 0
+        
+        return 0
+            
 
     def update(self):
-        margin_y = 100 # Смещение по Y для красоты
+        movement_name = self.properties.MovementName
+        margin_y = self.properties.MarginY # Смещение по Y для красоты
 
         self.counter += 1
         self.counter = 0 if self.counter > 120 else self.counter
 
         self.rect.centerx = self.connected_to.rect.centerx
-        self.rect.bottom = self.sine() + self.connected_to.rect.centery - margin_y
+        self.rect.bottom = self.movement(movement_name) + self.connected_to.rect.centery - margin_y
 
 
 class Particle(Tile):

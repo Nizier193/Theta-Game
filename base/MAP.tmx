@@ -534,6 +534,7 @@
   </object>
   <object id="490" gid="1034" x="656" y="1408" width="29" height="47">
    <properties>
+    <property name="MarginY" type="int" value="100"/>
     <property name="NotificationText" value="А у меня есть хехе"/>
    </properties>
   </object>

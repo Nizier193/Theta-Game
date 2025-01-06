@@ -4,6 +4,8 @@ from pydantic import BaseModel
 
 class NotificationParams(BaseModel):
     NotificationText: str = ""
+    MovementName: str = "Fixed"
+    MarginY: int = 100
     # Other params
 
 # Параметры движения NPC

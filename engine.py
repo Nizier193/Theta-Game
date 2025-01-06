@@ -175,7 +175,8 @@ class Map():
             # У объекта есть нотификация
             notification = Notification(
                 object=object,
-                text=text
+                text=text,
+                properties=properties
             )
             objects.append(notification)
 

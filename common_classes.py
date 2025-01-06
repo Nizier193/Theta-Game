@@ -9,7 +9,7 @@ class Camera(pg.sprite.Group):
     def __init__(self):
         super().__init__()
 
-        self.half_width, self.half_height = settings.width / 2, settings.height / 2 # TODO: // Make this customizable
+        self.half_width, self.half_height = settings.width / 2, settings.height / 2
 
         self.offset = pg.Vector2(0, 0)
         self.offset_add = pg.Vector2(0, -100)
