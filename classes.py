@@ -1,3 +1,4 @@
+from UI.inventory import Inventory, InventorySprite
 from common_classes import (
     Body, Tile,
     foreground,
@@ -5,6 +6,7 @@ from common_classes import (
     active,
     support,
     interactive,
+    particles,
     camera,
 )
 
@@ -13,10 +15,10 @@ import random
 import pygame as pg
 from pygame.transform import scale
 from typing import Any, Optional, Tuple, cast
-
 from pathlib import Path
 
 from models.tiled_models import Properties
+from models.support import TriggerType
 
 basepath = Path("base/textures")
 textures = {
@@ -46,6 +48,7 @@ class Hero(Body):
         self.max_speed = 4
 
         self.properties: Properties = properties
+        self.inventory: InventorySprite = InventorySprite(self, Inventory(self))
 
     def get_movement(self):
         keys = pg.key.get_pressed()
@@ -54,6 +57,14 @@ class Hero(Body):
     def keypress(self, event):
         if event.key == pg.K_SPACE:
             self.jump()
+        if event.key == pg.K_e:
+            self.inventory.open_inventory()
+        if event.key == pg.K_ESCAPE:
+            self.inventory.close_inventory()
+        if event.key == pg.K_j:
+            self.inventory.inventory.next_item(1)
+        if event.key == pg.K_h:
+            self.inventory.inventory.next_item(-1)
 
     def jump(self):
         if self.on_surface:
@@ -189,14 +200,6 @@ class Interactive(Tile):
             self.emit_particles()
         
         return super().update(*args, **kwargs)
-    
-
-class TriggerType:
-    CameraTrigger: str = "CameraTrigger"
-
-    CameraMove: str = "Move"
-    CameraSet: str = "Set"
-    CameraHero: str = "Hero"
 
 
 class Trigger(Tile):
@@ -343,7 +346,7 @@ class Particle(Tile):
     """Партикл, прозрачный двигающийся объект"""
     def __init__(self, position: Tuple[int, int], surface: pg.Surface, emitter_properties: Properties):
         super().__init__()
-        self.add(background)
+        self.add(particles)
         
         # Спавн
         self.spawn_pos = position

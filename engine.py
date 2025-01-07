@@ -1,7 +1,8 @@
 from chunk_engine import ChunkEngine, Tile
 from classes import active
-from common_classes import camera, settings
+from common_classes import camera, settings, inventory_group
 from models.support import TiledClassNames
+from UI.inventory import InventorySprite, Inventory, ItemSprite
 
 from classes import (
     NPC,
@@ -11,6 +12,7 @@ from classes import (
     interactive,
     camera
 )
+
 from classes import (
     Hero,
     Block,
@@ -83,8 +85,16 @@ class Map():
             bottom_center=hero_position,
             size=hero_size,
             texture=scale(hero_object.image, hero_size),
-            properties=hero_properties
+            properties=hero_properties,
         )
+
+        # Создание предмета-заглушку
+        item = ItemSprite(hero_object, "reimu_fumo.json", (550, 1400))
+        hero.inventory.inventory.item_sprites.add(item)
+
+        item = ItemSprite(hero_object, "apple.json", (600, 1400))
+        hero.inventory.inventory.item_sprites.add(item)
+
         self.process_object_properties(hero, hero_properties)
         return hero
 
@@ -221,6 +231,10 @@ class Game():
             # Кастомная отрисовка
             camera.update()
             camera.custom_draw(self.screen)
+
+            # Отрисовка инвентаря поверх всего
+            inventory_group.update()
+            inventory_group.draw(self.screen)
 
             # Рендер чанков
             all_positions_to_render = [npc.position for npc in active]

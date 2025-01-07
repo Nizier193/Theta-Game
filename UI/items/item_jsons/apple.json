@@ -1,0 +1,22 @@
+{
+    "ItemTexture": "error.png",
+    "ItemSize": [32, 32],
+    "Name": "Apple",
+    "Description": "Idk why this apple don`t have any texture =)",
+    "ItemType": "Consumable",
+    "Rarity": "Common",
+    "AttackProperties": {
+        "Damage": 0,
+        "Cooldown": 0,
+        "Type": "Ranged"
+    },
+    "ConsumeProperties": {
+        "Heal": 1,
+        "Armor": 0,
+        "ToggleSomething": ""
+    },
+    "LookProperties": {
+        "AdditionalDescription": "",
+        "ToggleSomething": ""
+    }
+}

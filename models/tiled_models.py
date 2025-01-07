@@ -45,6 +45,6 @@ class ObjectPropertiesParser:
         properties.notification_params = NotificationParams.model_validate(object_properties)
         properties.movement_params = MovementParams.model_validate(object_properties)
         properties.particles_params = ParticleParams.model_validate(object_properties)
-        properties.trigger_params = TriggerParams.model_validate(object_properties)
+        properties.trigger_params = TriggerParams.model_validate(object_properties) # TODO: Error there
 
         return properties

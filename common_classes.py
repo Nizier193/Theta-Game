@@ -33,9 +33,15 @@ class Camera(pg.sprite.Group):
     def custom_draw(self, display):
         self.target_camera(self.target)
 
+        # Отрисовка:
+        # Задний фон > Партиклы > Твёрдые блоки > Все остальные спрайты + Герой > Инвентарь
         self.draw_group(background, display)
+        self.draw_group(particles, display)
         self.draw_group(foreground, display)
         self.draw_group(self.all_ordered_sprites, display)
+
+        # Инвентарь + настройки и всё прочее
+        self.draw_group(inventory_group, display)
 
     # Customize
     def set_new_target(self, target: pg.sprite.Sprite):
@@ -50,17 +56,25 @@ class Camera(pg.sprite.Group):
         dummy_sprite.rect = dummy_sprite.image.get_rect(centerx=x, centery=y)
         self.set_new_target(dummy_sprite)
 
+
+
+
 # TODO: // Get rid of variables outside of classes
 camera = Camera()
 
 # Вспомогательные группы для столкновений etc
+# Рендерятся вне очереди
 foreground = pg.sprite.Group() # Стены, пол, etc
 background = pg.sprite.Group() # Фон
-
-interactive = pg.sprite.Group() # Мебель, картины, прозрачные объекты
+inventory_group = pg.sprite.Group() # Группа для инвентаря
 particles = pg.sprite.Group() # Партиклы: пули, стрелы, сердечки
+
+# Рендерятся по очереди
+# Переменные не используются для рендера, только для детекции коллизий и обновления
+interactive = pg.sprite.Group() # Мебель, картины, прозрачные объекты
 active = pg.sprite.Group() # Группа для NPC / Hero
-support = pg.sprite.Group() # Группа для саппорта: Диалоги, Инвентарь, Нотификации
+support = pg.sprite.Group() # Группа для саппорта: Диалоги Нотификации
+items = pg.sprite.Group() # Группа для отслеживания коллизии предмета и подбирающего
 
 
 class Tile(pg.sprite.Sprite):
@@ -89,6 +103,9 @@ class Body(pg.sprite.Sprite):
         self.image = pg.Surface(size)
         self.rect = self.image.get_rect()
         self.vector = pg.Vector2()
+        
+        self.hp = 100 # TODO: // Customize this
+        self.armor = 10 # TODO: // Customize this
 
 
     def update_image(self, newimage: pg.Surface):
