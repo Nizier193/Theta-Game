@@ -4,5 +4,6 @@
     "framerate": 65,
     "tilesize": 48,
     "initial_tilesize": 16,
-    "n_blocks_chunk": 5
+    "n_blocks_chunk": 5,
+    "item_basepath": "inventory/items"
 }

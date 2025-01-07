@@ -7,6 +7,7 @@ class Settings(BaseModel):
     tilesize: int = 48
     initial_tilesize: int = 16
     n_blocks_chunk: int = 10
+    item_basepath: str = "inventory/items"
 
 def load_settings() -> Settings:
     json_data = open("settings.json").read()

@@ -1,4 +1,4 @@
-from UI.inventory import Inventory, InventorySprite
+from inventory.inventory import Inventory, InventorySprite
 from common_classes import (
     Body, Tile,
     foreground,
@@ -61,10 +61,12 @@ class Hero(Body):
             self.inventory.open_inventory()
         if event.key == pg.K_ESCAPE:
             self.inventory.close_inventory()
-        if event.key == pg.K_j:
+        if event.key == pg.K_RIGHT:
             self.inventory.inventory.next_item(1)
-        if event.key == pg.K_h:
+        if event.key == pg.K_LEFT:
             self.inventory.inventory.next_item(-1)
+        if event.key == pg.K_e:
+            self.inventory.inventory.use_item()
 
     def jump(self):
         if self.on_surface:

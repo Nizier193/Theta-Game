@@ -9,14 +9,14 @@ import json
 
 from models.settings import load_settings
 from common_classes import camera, inventory_group, items, active, Body
-from UI.item_models import ItemParams, ItemType
+from inventory.item_models import ItemParams, ItemType
 
 settings = load_settings()
 ratio = settings.tilesize / settings.initial_tilesize
 
 # Предмет в инвентаре
 class Item():
-    def __init__(self, json_name: str, basepath: Path = Path("UI/items")) -> None:
+    def __init__(self, json_name: str, basepath: Path = Path(settings.item_basepath)) -> None:
         self.json_name = json_name
         json_path = basepath / Path("item_jsons") / self.json_name
         self.properties = ItemParams.model_validate(json.load(open(json_path, "r")))
@@ -95,8 +95,6 @@ class Inventory():
             self.current_index -= 1
         if dx > 0 and self.current_index != 15:
             self.current_index += 1
-
-        print(self.current_index)
 
 
     def drop_item(self):
@@ -192,6 +190,19 @@ class InventorySprite(Sprite):
         image = scale(image, (size, size))
         self.image.blit(image, topleft)
 
+    def split_sentence(self, sentence, num_of_char):
+        split_sentence = []
+        sentence_word = sentence.split(' ')
+        current_line = ""
+        for word in sentence_word:
+            if len(current_line) + len(word) <= num_of_char:
+                current_line += word + " "
+            else:
+                split_sentence.append(current_line)
+                current_line = word + " "
+        split_sentence.append(current_line)
+        return split_sentence
+
     def render_on_inventory(self):
         self.image.fill((0, 0, 0)) # Заполнение фона
         item_image, item_text, item_properties = self.show_parameters()
@@ -201,13 +212,37 @@ class InventorySprite(Sprite):
 
         self.render_image(item_image, topleft=(margin_x, margin_y), size=item_image_size)
 
-        for idx, text in enumerate(item_text):
+        texts: List[str] = [txt for sentence in item_text for txt in self.split_sentence(sentence, 50)]
+
+        for idx, text in enumerate(texts):
+            addictional_padding = 0
+            if idx == len(texts) - 1:
+                addictional_padding = 10
+
             self.render_text(
                 text, 
-                (int(150 * self.ratio), int(idx * self.padding)), 
+                (int(150 * self.ratio), int(idx * self.padding + addictional_padding)), 
                 self.font_text,
                 color=(255, 255, 255)
             )
+
+        if item_properties:
+            props = item_properties.properties
+            item_type: str = item_properties.properties.ItemType
+            if item_type == ItemType.Consumable:
+                texts: List[str] = [
+                    f"Heal: {props.ConsumeProperties.Heal}",
+                    f"Armor: {props.ConsumeProperties.Armor}"
+                ]
+            
+            for idx, text in enumerate(texts):
+                self.render_text(
+                    text, 
+                    (int(10 * self.ratio), int(idx * self.padding + 150 * self.ratio)), 
+                    self.font_text,
+                    color=(255, 255, 255)
+                )
+
 
     def update(self):
         self.render_on_inventory()

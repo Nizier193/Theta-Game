@@ -2,7 +2,7 @@ from chunk_engine import ChunkEngine, Tile
 from classes import active
 from common_classes import camera, settings, inventory_group
 from models.support import TiledClassNames
-from UI.inventory import InventorySprite, Inventory, ItemSprite
+from inventory.inventory import InventorySprite, Inventory, ItemSprite
 
 from classes import (
     NPC,
