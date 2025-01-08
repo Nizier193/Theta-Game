@@ -1,4 +1,4 @@
-from inventory.inventory import Inventory, InventorySprite
+from inventory.inventory import Inventory, InventorySprite, ParamBarSprite
 from common_classes import (
     Body, Tile,
     foreground,
@@ -49,6 +49,7 @@ class Hero(Body):
 
         self.properties: Properties = properties
         self.inventory: InventorySprite = InventorySprite(self, Inventory(self))
+        self.param_bar = ParamBarSprite(self, self.inventory.inventory)
 
     def get_movement(self):
         keys = pg.key.get_pressed()
@@ -57,10 +58,8 @@ class Hero(Body):
     def keypress(self, event):
         if event.key == pg.K_SPACE:
             self.jump()
-        if event.key == pg.K_e:
-            self.inventory.open_inventory()
         if event.key == pg.K_ESCAPE:
-            self.inventory.close_inventory()
+            self.inventory.open_close_inventory()
         if event.key == pg.K_RIGHT:
             self.inventory.inventory.next_item(1)
         if event.key == pg.K_LEFT:

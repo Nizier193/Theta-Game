@@ -121,11 +121,162 @@ class Inventory():
 
         item.use()
 
+class Image():
+    def __init__(self, path: str, object: Any, metric_name: str) -> None:
+        self.image = pg.image.load(settings.item_basepath / Path(path))
+        self.object = object
+        self.metric = "None"
+        self.metric_name = metric_name
+
+    
+    def get_metric(self):
+        if self.metric_name == "hp":
+            self.metric = str(self.object.hp)
+        if self.metric_name == "armor":
+            self.metric = str(self.object.armor)
+        if self.metric_name == "vecx":
+            self.metric = str(self.object.vector.x)
+        if self.metric_name == "vecy":
+            self.metric = str(self.object.vector.y)
+        
+
+class ParamBarSprite(Sprite):
+    def __init__(self, object: Sprite, inventory: Inventory):
+        super().__init__()
+        self.add(inventory_group)
+
+        # Текстурки для отображения
+        self.metrics = [
+            Image("heart.png", object, "hp"),
+            Image("heart.png", object, "armor"),
+            Image("heart.png", object, "vecx"),
+            Image("heart.png", object, "vecy")
+        ]
+        self.font = pg.font.SysFont("Arial", 24)
+
+        self.object = object
+        self.inventory = inventory
+
+        self.ratio = 1
+        self.row_size = 128
+        self.col_size = 64
+        self.n_col = 4
+
+        self.padding = 5
+
+        self.bar_size = (
+            self.row_size + (self.padding * 2), 
+            (self.col_size + self.padding) * self.n_col
+        )
+        self.image = pg.Surface(self.bar_size)
+
+        width, height = self.bar_size
+        self.rect = self.image.get_rect(
+            topleft = (settings.width - width - 20, settings.height - height - 20)
+        )
+
+    def render_image(self, image: pg.Surface, topleft: Tuple[int, int]):
+        image = scale(image, (self.col_size, self.col_size))
+        self.image.blit(image, topleft)
+
+    def render_text(self, text: str, topleft: Tuple[int, int], font: pg.font.Font, color: Tuple[int, int, int]):
+        text_image = font.render(
+            text, True, color
+        )
+        self.image.blit(text_image, topleft)    
+    
+    def update(self):
+        self.image.fill((0, 0, 0))
+
+        for idx, metric in enumerate(self.metrics):
+            posx = self.padding
+            posy = self.padding + self.col_size * idx
+            self.render_image(metric.image, topleft=(posx, posy))
+            metric.get_metric()
+            self.render_text(metric.metric, (posx + 64, posy), self.font, (255, 255, 255))
+    
+
+
+class ItemBarSprite(Sprite):
+    def __init__(self, inventory: Inventory):
+        super().__init__()
+        self.add(inventory_group)
+
+        self.inventory = inventory
+
+        self.ratio =  1
+        self.item_size = 64
+        self.padding = 5
+        self.n_row = 8
+        self.n_col = 2
+
+        self.selector = pg.image.load(settings.item_basepath / Path("selector.png"))
+        self.selector = scale(self.selector, (self.item_size * self.ratio, self.item_size * self.ratio))
+
+        self.bar_size = (
+            (self.item_size * self.n_row + (self.padding * (self.n_row + 1))) * self.ratio, # n_row айтемов в ряду + (n_row + 1) отступов
+            (self.item_size * self.n_col + (self.padding * (self.n_col + 1))) * self.ratio  # n_col айтема в строке + (n_col + 1) отступов
+        )
+        _, height = self.bar_size
+
+        self.image = pg.Surface(self.bar_size)
+        x, _ = self.bar_size
+        self.rect = self.image.get_rect(topleft = (-x, settings.height - height - 20))
+
+    def close_bar(self):
+        x, _ = self.bar_size
+        _, y_c = self.rect.topleft
+
+        self.rect.topleft = (-x, y_c)
+        print("Closed bar")
+   
+    def open_bar(self):
+        x, _ = self.bar_size
+        _, y_c = self.rect.topleft
+
+        self.rect.topleft  = (20, y_c)
+        print("Opened bar")
+   
+    def render_image(self, image: pg.Surface, topleft: Tuple[int, int]):
+        image = scale(image, (self.item_size, self.item_size))
+        self.image.blit(image, topleft)
+ 
+    def point_on_selected(self):
+        selected_item = self.inventory.current_index
+
+        n_row = selected_item // 8
+        n_col = selected_item % 8
+
+        x = n_col * (self.item_size + self.padding) + self.padding
+        y = n_row * (self.item_size + self.padding) + self.padding
+
+        self.image.blit(self.selector, (x, y))
+
+    def update(self):
+        self.image.fill((0, 0, 0)) # Заглушка на фон
+        
+        for idx, item in enumerate(self.inventory.item_sprites):
+            n_row = idx // 8
+            n_col = idx % 8
+
+            image: pg.Surface = item.item.texture
+            self.render_image(
+                image, 
+                (n_col * (self.item_size + self.padding) + self.padding, 
+                 n_row * (self.item_size + self.padding) + self.padding)
+            )
+
+        self.point_on_selected()
+
+            
 
 class InventorySprite(Sprite):
     def __init__(self, object: Sprite, inventory: Inventory):
         super().__init__()
         self.add(inventory_group)
+
+        # Дополнительная штука, отображение всех айтемов
+        self.bar = ItemBarSprite(inventory)
         
         self.game_object = object # Чьи параметры будут показываться в инвентаре
 
@@ -146,21 +297,24 @@ class InventorySprite(Sprite):
 
         self.inventory = inventory
         self.image = pg.Surface(self.inventory_size)
-        self.rect = self.image.get_rect(topleft=(20, 20))
 
-    def close_inventory(self):
         x, _ = self.inventory_size
-        x_c, y_c = self.rect.topleft
-        self.rect.topleft = (-x, y_c)
+        self.rect = self.image.get_rect(topleft=(-x, 20))
+        self.opened = False
 
-        print("Closed inventory")
-
-    def open_inventory(self):
-        x, _ = self.inventory_size
-        x_c, y_c = self.rect.topleft
-        self.rect.topleft = (20, y_c)
-
-        print("Opened inventory")
+    def open_close_inventory(self):
+        if self.opened:
+            x, _ = self.inventory_size
+            x_c, y_c = self.rect.topleft
+            self.rect.topleft = (-x, y_c)
+            self.bar.close_bar()
+            self.opened = False
+        else:
+            x, _ = self.inventory_size
+            x_c, y_c = self.rect.topleft
+            self.rect.topleft = (20, y_c)
+            self.bar.open_bar()
+            self.opened = True
 
     def show_parameters(self) -> Tuple[pg.Surface, List[str], Optional[Item]]:
         item = self.inventory.get_current_item()
@@ -242,7 +396,6 @@ class InventorySprite(Sprite):
                     self.font_text,
                     color=(255, 255, 255)
                 )
-
 
     def update(self):
         self.render_on_inventory()

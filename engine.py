@@ -88,12 +88,8 @@ class Map():
             properties=hero_properties,
         )
 
-        # Создание предмета-заглушку
-        item = ItemSprite(hero_object, "reimu_fumo.json", (550, 1400))
-        hero.inventory.inventory.item_sprites.add(item)
-
-        item = ItemSprite(hero_object, "apple.json", (600, 1400))
-        hero.inventory.inventory.item_sprites.add(item)
+        item = ItemSprite(hero, "reimu_fumo.json", (550 * self.ratio, 1300 * self.ratio))
+        item.apply_physics = True
 
         self.process_object_properties(hero, hero_properties)
         return hero
