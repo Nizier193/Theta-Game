@@ -37,7 +37,7 @@ class ItemSprite(Body):
         self.add(inventory_group, items)
 
         self.update_image(scale(self.item.texture, self.item.properties.ItemSize))
-        self.rect = self.image.get_rect(center=center)
+        self.rect = self.image.get_rect(topleft=center)
 
         self.apply_physics = False
 
@@ -70,6 +70,7 @@ class ItemSprite(Body):
 
             self.rect.y += self.vector.y
             self.vertical_collisions()
+
 
 
 class Inventory():
@@ -120,38 +121,14 @@ class Inventory():
             return
 
         item.use()
-
-class Image():
-    def __init__(self, path: str, object: Any, metric_name: str) -> None:
-        self.image = pg.image.load(settings.item_basepath / Path(path))
-        self.object = object
-        self.metric = "None"
-        self.metric_name = metric_name
-
-    
-    def get_metric(self):
-        if self.metric_name == "hp":
-            self.metric = str(self.object.hp)
-        if self.metric_name == "armor":
-            self.metric = str(self.object.armor)
-        if self.metric_name == "vecx":
-            self.metric = str(self.object.vector.x)
-        if self.metric_name == "vecy":
-            self.metric = str(self.object.vector.y)
         
+
 
 class ParamBarSprite(Sprite):
     def __init__(self, object: Sprite, inventory: Inventory):
         super().__init__()
         self.add(inventory_group)
 
-        # Текстурки для отображения
-        self.metrics = [
-            Image("heart.png", object, "hp"),
-            Image("heart.png", object, "armor"),
-            Image("heart.png", object, "vecx"),
-            Image("heart.png", object, "vecy")
-        ]
         self.font = pg.font.SysFont("Arial", 24)
 
         self.object = object
@@ -188,12 +165,12 @@ class ParamBarSprite(Sprite):
     def update(self):
         self.image.fill((0, 0, 0))
 
-        for idx, metric in enumerate(self.metrics):
-            posx = self.padding
-            posy = self.padding + self.col_size * idx
-            self.render_image(metric.image, topleft=(posx, posy))
-            metric.get_metric()
-            self.render_text(metric.metric, (posx + 64, posy), self.font, (255, 255, 255))
+        # for idx, metric in enumerate(self.metrics):
+        #     posx = self.padding
+        #     posy = self.padding + self.col_size * idx
+        #     self.render_image(metric.image, topleft=(posx, posy))
+        #     metric.get_metric()
+        #     self.render_text(metric.metric, (posx + 64, posy), self.font, (255, 255, 255))
     
 
 
@@ -368,6 +345,7 @@ class InventorySprite(Sprite):
 
         texts: List[str] = [txt for sentence in item_text for txt in self.split_sentence(sentence, 50)]
 
+        # Отображение основного текста
         for idx, text in enumerate(texts):
             addictional_padding = 0
             if idx == len(texts) - 1:
@@ -380,6 +358,7 @@ class InventorySprite(Sprite):
                 color=(255, 255, 255)
             )
 
+        # Отображение сбоку
         if item_properties:
             props = item_properties.properties
             item_type: str = item_properties.properties.ItemType

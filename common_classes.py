@@ -107,6 +107,9 @@ class Body(pg.sprite.Sprite):
         self.hp = 100 # TODO: // Customize this
         self.armor = 10 # TODO: // Customize this
 
+        self.max_gravity = 10
+        self.gravity_pull = 0.5
+
 
     def update_image(self, newimage: pg.Surface):
         self.image = newimage
@@ -135,9 +138,9 @@ class Body(pg.sprite.Sprite):
                     self.rect.bottom = sprites.rect.top
 
                     self.on_surface = True
+                    self.vector.y = 0
 
 
     def gravitate(self):
-        if self.vector.y < 10:
-            self.vector.y += 1
+        self.vector.y += self.gravity_pull
 

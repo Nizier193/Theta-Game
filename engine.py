@@ -67,6 +67,7 @@ class Map():
         self.hero = self.render_hero() # Создание игрока
         ordered_sprites_group.add(self.hero)
 
+        # Обновление камеры на рендер
         camera.all_ordered_sprites = ordered_sprites_group
         camera.set_new_target(self.hero)
 
@@ -87,9 +88,6 @@ class Map():
             texture=scale(hero_object.image, hero_size),
             properties=hero_properties,
         )
-
-        item = ItemSprite(hero, "reimu_fumo.json", (550 * self.ratio, 1300 * self.ratio))
-        item.apply_physics = True
 
         self.process_object_properties(hero, hero_properties)
         return hero
@@ -157,6 +155,15 @@ class Map():
                     properties=properties,
                     surface=image
                 )
+            elif properties.object_type == ObjectTypeNames.Item:
+                # Добавлять предмет в список рендера не нужно - он обновляется вне очереди
+                item = ItemSprite(
+                    None, 
+                    properties.item_params.JsonName, 
+                    center = (sized_x, sized_y)
+                )
+                item.apply_physics = True
+                continue
             
             elif properties.object_type == ObjectTypeNames.Hero or properties.object_type == "Particle":
                 # Создание игрока, можно сюда чё-то запихать, но в целом не нужно

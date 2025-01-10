@@ -43,10 +43,15 @@ class Hero(Body):
         )
         self.position: Tuple[int, int] = (self.rect.x, self.rect.y)
 
+        # Movement parameters
         self.on_surface = False
-        self.acceleration_factor = 0.5
+        self.acceleration_factor = 0.7
         self.max_speed = 4
+        self.max_jump = 22
+        self.max_gravity = 10
+        self.gravity_pull = 1
 
+        # Parameters of GUI and Inventory
         self.properties: Properties = properties
         self.inventory: InventorySprite = InventorySprite(self, Inventory(self))
         self.param_bar = ParamBarSprite(self, self.inventory.inventory)
@@ -69,9 +74,8 @@ class Hero(Body):
 
     def jump(self):
         if self.on_surface:
-            self.vector.y -= 25
+            self.vector.y -= self.max_jump
             self.on_surface = False
-
 
     def update(self):
         movement = self.get_movement()

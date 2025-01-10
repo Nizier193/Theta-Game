@@ -1,5 +1,5 @@
 from typing import Optional
-from models.tiled_object_params import NotificationParams, TriggerParams, MovementParams, ParticleParams
+from models.tiled_object_params import NotificationParams, TriggerParams, MovementParams, ParticleParams, ItemParams
 
 class ObjectTypeNames:
     NPC: str = "NPC"
@@ -8,6 +8,7 @@ class ObjectTypeNames:
     Interactive: str = "Interactive"
     Particle: str = "Particle"
     Hero: str = "Hero"
+    Item: str = "Item"
 
 
 # Класс, описывающий атрибуты объектов в Tiled
@@ -18,6 +19,7 @@ class Properties:
         self.movement_params: MovementParams = MovementParams()
         self.particles_params: ParticleParams = ParticleParams()
         self.trigger_params: TriggerParams = TriggerParams()
+        self.item_params: ItemParams = ItemParams()
 
     def __repr__(self) -> str:
         text = f"""
@@ -46,5 +48,6 @@ class ObjectPropertiesParser:
         properties.movement_params = MovementParams.model_validate(object_properties)
         properties.particles_params = ParticleParams.model_validate(object_properties)
         properties.trigger_params = TriggerParams.model_validate(object_properties) # TODO: Error there
+        properties.item_params = ItemParams.model_validate(object_properties)
 
         return properties

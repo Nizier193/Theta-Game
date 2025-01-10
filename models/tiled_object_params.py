@@ -37,3 +37,7 @@ class TriggerParams(BaseModel):
     ToY: Optional[int] = None
     CameraMovement: Optional[str] = "Move"
 
+
+class ItemParams(BaseModel):
+    JsonName: str = "error.json"
+
