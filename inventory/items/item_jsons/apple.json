@@ -13,7 +13,8 @@
     "ConsumeProperties": {
         "Heal": 1,
         "Armor": 0,
-        "ToggleSomething": ""
+        "ToggleSomething": "",
+        "UseText": "Cool apple =)"
     },
     "LookProperties": {
         "AdditionalDescription": "",

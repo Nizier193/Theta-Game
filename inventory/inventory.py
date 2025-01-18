@@ -5,72 +5,24 @@ from typing import List
 import pygame as pg
 from pygame.sprite import Sprite, Group, spritecollide
 from pygame.transform import scale
-import json
 
-from models.settings import load_settings
+from support.pygame_loaders import ImageLoader
+from support.settings import load_settings
 from common_classes import camera, inventory_group, items, active, Body
-from inventory.item_models import ItemParams, ItemType
+
+from inventory.item_models import ItemType
+from inventory.item_classes import Item, ItemSprite
+from inventory.item_bar import ItemBarSprite
+from inventory.inventory_models import TextBarSprite
 
 settings = load_settings()
-ratio = settings.tilesize / settings.initial_tilesize
+font_path = Path(settings.font_path) / Path(settings.font_name)
 
-# Предмет в инвентаре
-class Item():
-    def __init__(self, json_name: str, basepath: Path = Path(settings.item_basepath)) -> None:
-        self.json_name = json_name
-        json_path = basepath / Path("item_jsons") / self.json_name
-        self.properties = ItemParams.model_validate(json.load(open(json_path, "r")))
-
-        texture_path = basepath / Path("item_textures") / self.properties.ItemTexture
-        self.texture = pg.image.load(texture_path)
-
-        print(f"Initialized item {self.properties.Name}")
-
-
-
-class ItemSprite(Body):
-    def __init__(self, object: Union[Sprite, None], json_name: str, center: Tuple[int, int]) -> None:
-        self.item = Item(json_name)
-        self.object_holding = object # Тот, кто держит предмет
-
-        super().__init__(size=self.item.properties.ItemSize)
-        self.add(inventory_group, items)
-
-        self.update_image(scale(self.item.texture, self.item.properties.ItemSize))
-        self.rect = self.image.get_rect(topleft=center)
-
-        self.apply_physics = False
-
-    def use(self):
-        if not self.object_holding:
-            raise Exception("Function <use> cannot be called outside of inventory")
-
-        props = self.item.properties
-
-        if props.ItemType == ItemType.Basic:
-            print("It`s a dumb object")
-            self.kill()
-            return -1
-
-        if props.ItemType == ItemType.Consumable:
-            self.object_holding.hp += self.item.properties.ConsumeProperties.Heal
-            self.object_holding.armor += self.item.properties.ConsumeProperties.Armor
-            self.kill()
-            return -1 # Объект из инвентаря надо удалить
-        
-        if props.ItemType == ItemType.Weapon:
-            ...
-
-        if props.ItemType == ItemType.Look:
-            ...
-
-    def update(self):
-        if self.apply_physics:
-            self.gravitate()
-
-            self.rect.y += self.vector.y
-            self.vertical_collisions()
-
+ratio = 0.8
+text_bar = TextBarSprite(
+    (670 * ratio, 150 * ratio),
+    (20 * ratio, (370 + 40) * ratio)
+)
 
 
 class Inventory():
@@ -113,6 +65,11 @@ class Inventory():
         camera.all_ordered_sprites.add(item_spawned) # Добавление в список на рендер
 
 
+    def hold_item(self):
+        # I`m lazy to implement this
+        # TODO: Implement this ok? =)
+        pass
+
     # Inventory usage
     def use_item(self):
         "Uses item and does something"
@@ -120,159 +77,32 @@ class Inventory():
         if not item:
             return
 
-        item.use()
-        
+        text = item.use()
+        text_bar.set_new_text(text)
 
-
-class ParamBarSprite(Sprite):
-    def __init__(self, object: Sprite, inventory: Inventory):
-        super().__init__()
-        self.add(inventory_group)
-
-        self.font = pg.font.SysFont("Arial", 24)
-
-        self.object = object
-        self.inventory = inventory
-
-        self.ratio = 1
-        self.row_size = 128
-        self.col_size = 64
-        self.n_col = 4
-
-        self.padding = 5
-
-        self.bar_size = (
-            self.row_size + (self.padding * 2), 
-            (self.col_size + self.padding) * self.n_col
-        )
-        self.image = pg.Surface(self.bar_size)
-
-        width, height = self.bar_size
-        self.rect = self.image.get_rect(
-            topleft = (settings.width - width - 20, settings.height - height - 20)
-        )
-
-    def render_image(self, image: pg.Surface, topleft: Tuple[int, int]):
-        image = scale(image, (self.col_size, self.col_size))
-        self.image.blit(image, topleft)
-
-    def render_text(self, text: str, topleft: Tuple[int, int], font: pg.font.Font, color: Tuple[int, int, int]):
-        text_image = font.render(
-            text, True, color
-        )
-        self.image.blit(text_image, topleft)    
-    
-    def update(self):
-        self.image.fill((0, 0, 0))
-
-        # for idx, metric in enumerate(self.metrics):
-        #     posx = self.padding
-        #     posy = self.padding + self.col_size * idx
-        #     self.render_image(metric.image, topleft=(posx, posy))
-        #     metric.get_metric()
-        #     self.render_text(metric.metric, (posx + 64, posy), self.font, (255, 255, 255))
-    
-
-
-class ItemBarSprite(Sprite):
-    def __init__(self, inventory: Inventory):
-        super().__init__()
-        self.add(inventory_group)
-
-        self.inventory = inventory
-
-        self.ratio =  1
-        self.item_size = 64
-        self.padding = 5
-        self.n_row = 8
-        self.n_col = 2
-
-        self.selector = pg.image.load(settings.item_basepath / Path("selector.png"))
-        self.selector = scale(self.selector, (self.item_size * self.ratio, self.item_size * self.ratio))
-
-        self.bar_size = (
-            (self.item_size * self.n_row + (self.padding * (self.n_row + 1))) * self.ratio, # n_row айтемов в ряду + (n_row + 1) отступов
-            (self.item_size * self.n_col + (self.padding * (self.n_col + 1))) * self.ratio  # n_col айтема в строке + (n_col + 1) отступов
-        )
-        _, height = self.bar_size
-
-        self.image = pg.Surface(self.bar_size)
-        x, _ = self.bar_size
-        self.rect = self.image.get_rect(topleft = (-x, settings.height - height - 20))
-
-    def close_bar(self):
-        x, _ = self.bar_size
-        _, y_c = self.rect.topleft
-
-        self.rect.topleft = (-x, y_c)
-        print("Closed bar")
-   
-    def open_bar(self):
-        x, _ = self.bar_size
-        _, y_c = self.rect.topleft
-
-        self.rect.topleft  = (20, y_c)
-        print("Opened bar")
-   
-    def render_image(self, image: pg.Surface, topleft: Tuple[int, int]):
-        image = scale(image, (self.item_size, self.item_size))
-        self.image.blit(image, topleft)
- 
-    def point_on_selected(self):
-        selected_item = self.inventory.current_index
-
-        n_row = selected_item // 8
-        n_col = selected_item % 8
-
-        x = n_col * (self.item_size + self.padding) + self.padding
-        y = n_row * (self.item_size + self.padding) + self.padding
-
-        self.image.blit(self.selector, (x, y))
-
-    def update(self):
-        self.image.fill((0, 0, 0)) # Заглушка на фон
-        
-        for idx, item in enumerate(self.inventory.item_sprites):
-            n_row = idx // 8
-            n_col = idx % 8
-
-            image: pg.Surface = item.item.texture
-            self.render_image(
-                image, 
-                (n_col * (self.item_size + self.padding) + self.padding, 
-                 n_row * (self.item_size + self.padding) + self.padding)
-            )
-
-        self.point_on_selected()
-
-            
 
 class InventorySprite(Sprite):
     def __init__(self, object: Sprite, inventory: Inventory):
         super().__init__()
         self.add(inventory_group)
 
+        self.ratio = ratio
+
         # Дополнительная штука, отображение всех айтемов
         self.bar = ItemBarSprite(inventory)
+        self.text_bar = text_bar
         
         self.game_object = object # Чьи параметры будут показываться в инвентаре
 
-        self.ratio = 0.8
         self.inventory_size = (670 * self.ratio, 370 * self.ratio) # Длина и ширина инвентаря
-        #       10    650    10    = 670
-        #   10   --------------
-        #       |             |
-        #   350 |             |
-        #       |             |
-        #   10  --------------
-        #
-        #  = 370
 
-        self.font_title = pg.font.SysFont("Arial", int(50 * self.ratio))
-        self.font_text = pg.font.SysFont("Arial", int(25 * self.ratio))
+        self.font_title = pg.font.Font(font_path, int(50 * self.ratio))
+        self.font_text = pg.font.Font(font_path, int(25 * self.ratio))
         self.padding = 25 * self.ratio
 
         self.inventory = inventory
+
+        self.texture = ImageLoader(settings.inventory_background_path, self.inventory_size).sized_image
         self.image = pg.Surface(self.inventory_size)
 
         x, _ = self.inventory_size
@@ -285,12 +115,16 @@ class InventorySprite(Sprite):
             x_c, y_c = self.rect.topleft
             self.rect.topleft = (-x, y_c)
             self.bar.close_bar()
+            self.text_bar.close_bar()
             self.opened = False
+
+
         else:
             x, _ = self.inventory_size
             x_c, y_c = self.rect.topleft
             self.rect.topleft = (20, y_c)
             self.bar.open_bar()
+            self.text_bar.open_bar()
             self.opened = True
 
     def show_parameters(self) -> Tuple[pg.Surface, List[str], Optional[Item]]:
@@ -335,7 +169,7 @@ class InventorySprite(Sprite):
         return split_sentence
 
     def render_on_inventory(self):
-        self.image.fill((0, 0, 0)) # Заполнение фона
+        self.image.blit(self.texture, (0, 0)) # Заполнение фона
         item_image, item_text, item_properties = self.show_parameters()
 
         margin_x, margin_y = int(10 * self.ratio), int(10 * self.ratio)
@@ -343,7 +177,7 @@ class InventorySprite(Sprite):
 
         self.render_image(item_image, topleft=(margin_x, margin_y), size=item_image_size)
 
-        texts: List[str] = [txt for sentence in item_text for txt in self.split_sentence(sentence, 50)]
+        texts: List[str] = [txt for sentence in item_text for txt in self.split_sentence(sentence, 45)]
 
         # Отображение основного текста
         for idx, text in enumerate(texts):
@@ -380,12 +214,13 @@ class InventorySprite(Sprite):
         self.render_on_inventory()
 
         for item in spritecollide(self.game_object, items, False):
-            item: ItemSprite = item
-            
-            item_params = item.item
-            new_item = ItemSprite(self.game_object, item_params.json_name, (0, 0))
-            new_item.apply_physics = False
+            if len(list(self.inventory.item_sprites)) < 16:
+                item: ItemSprite = item
+                
+                item_params = item.item
+                new_item = ItemSprite(self.game_object, item_params.json_name, (0, 0))
+                new_item.apply_physics = False
 
-            self.inventory.item_sprites.add(new_item)
-            item.kill()
+                self.inventory.item_sprites.add(new_item)
+                item.kill()
             

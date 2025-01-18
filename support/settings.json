@@ -1,0 +1,20 @@
+{
+    "width": 1280,
+    "height": 720,
+    "framerate": 65,
+    "tilesize": 48,
+    "initial_tilesize": 16,
+    "n_blocks_chunk": 5,
+
+    "inventory_background_path": "lore_and_stuff/future_images/items_bar_background_ref.jpg",
+    "inventory_item_bar_path": "lore_and_stuff/future_images/items_bar_background_ref.jpg",
+    "inventory_add_text_bar_path": "lore_and_stuff/future_images/items_bar_background_ref.jpg",
+    "inventory_selector": "inventory/items/selector.png",
+
+    "item_textures": "inventory/items/item_textures",
+    "item_jsons": "inventory/items/item_jsons",
+    "item_error_path": "inventory/items/item_textures/error.png",
+
+    "font_path": "base/font",
+    "font_name": "Bahnschrift.ttf"
+}

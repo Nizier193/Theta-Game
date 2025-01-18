@@ -246,7 +246,8 @@ class Game():
             self.display_custom_info([
                 "Debug Info:",
                 f"FPS: {round(fps)}",
-                f"Chunk: {chunk}"
+                f"Chunk: {chunk}",
+                f"Vector: {self.hero.vector}"
             ])
             pg.display.update()
             self.clock.tick(settings.framerate)

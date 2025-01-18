@@ -1,4 +1,5 @@
-from inventory.inventory import Inventory, InventorySprite, ParamBarSprite
+from inventory.inventory import Inventory, InventorySprite
+from inventory.inventory_models import ParamBarSprite
 from common_classes import (
     Body, Tile,
     foreground,
@@ -45,11 +46,13 @@ class Hero(Body):
 
         # Movement parameters
         self.on_surface = False
-        self.acceleration_factor = 0.7
+        self.acceleration_factor = 1
         self.max_speed = 4
         self.max_jump = 22
         self.max_gravity = 10
         self.gravity_pull = 1
+
+        self.side_turned: int = 1 # Повернут вправо -1 otherwise
 
         # Parameters of GUI and Inventory
         self.properties: Properties = properties
@@ -83,6 +86,8 @@ class Hero(Body):
         if movement[pg.K_d]:
             if self.vector.x < self.max_speed:
                 self.vector.x += self.acceleration_factor
+
+                self.side_turned = 1
         else:
             if self.vector.x > 0:
                 self.vector.x -= self.acceleration_factor
@@ -90,9 +95,12 @@ class Hero(Body):
         if movement[pg.K_a]:
             if self.vector.x > -self.max_speed:
                 self.vector.x -= self.acceleration_factor
+
+                self.side_turned = -1
         else:
             if self.vector.x < 0:
                 self.vector.x += self.acceleration_factor
+
 
         self.gravitate()
 

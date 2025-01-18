@@ -8,3 +8,5 @@ class TriggerType:
     CameraMove: str = "Move"
     CameraSet: str = "Set"
     CameraHero: str = "Hero"
+
+

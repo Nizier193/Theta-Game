@@ -19,6 +19,7 @@ class ItemConsumable(BaseModel):
     Heal: int = 0
     Armor: int = 0
     ToggleSomething: str = ""
+    UseText: str = "You have used uh... ???"
 
 
 class ItemLook(BaseModel):

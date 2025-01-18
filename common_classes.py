@@ -1,6 +1,6 @@
 from typing import Tuple
 import pygame as pg
-from models.settings import load_settings
+from support.settings import load_settings
 
 settings = load_settings()
 

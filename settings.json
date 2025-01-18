@@ -1,9 +1,0 @@
-{
-    "width": 1280,
-    "height": 720,
-    "framerate": 65,
-    "tilesize": 48,
-    "initial_tilesize": 16,
-    "n_blocks_chunk": 5,
-    "item_basepath": "inventory/items"
-}
