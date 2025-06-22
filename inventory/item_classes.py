@@ -84,3 +84,4 @@ class ItemSprite(Body):
 
             self.rect.y += self.vector.y
             self.vertical_collisions()
+

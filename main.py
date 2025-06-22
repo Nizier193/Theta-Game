@@ -1,5 +1,4 @@
-from engine import Game, chunk_engine
-
+from engine import Game
 '''
 Это мой локальный проект, посвященный созданию игры, которая будет мне по душе)
 

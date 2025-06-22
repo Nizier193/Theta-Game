@@ -47,8 +47,8 @@ class Hero(Body):
         # Movement parameters
         self.on_surface = False
         self.acceleration_factor = 1
-        self.max_speed = 4
-        self.max_jump = 22
+        self.max_speed = 7
+        self.max_jump = 20
         self.max_gravity = 10
         self.gravity_pull = 1
 

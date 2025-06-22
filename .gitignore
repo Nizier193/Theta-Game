@@ -1,5 +1,6 @@
 .venv
 .idea
+.vscode
 __pycache__
 map_backup.tmx
 lore_and_stuff
